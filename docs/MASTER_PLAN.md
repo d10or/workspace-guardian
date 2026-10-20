@@ -1,6 +1,6 @@
 # Multi-Agent Workspace Guardian
 ## Business, Product & Execution Master Plan
-**Version:** 1.0 | **Prepared:** 2026-10-17 | **Pilot:** 2026-10-19 to 2026-11-29 | **Status:** G1 desk research done 2026-10-17 (see `RESEARCH_G1.md`); H1 accepted via desk research + founder's own incidents; G2 in progress: mod v0.14.1 with task ownership, CLI v0.1 with inspect / task / check / handoff (2026-10-20)
+**Version:** 1.0 | **Prepared:** 2026-10-17 | **Pilot:** 2026-10-19 to 2026-11-29 | **Status:** G1 desk research done 2026-10-17 (see `RESEARCH_G1.md`); H1 accepted via desk research + founder's own incidents; G2 closed 2026-10-20 (see `SAFETY_AUDIT.md`, `PROGRESS.md`); G3–G6 artifacts prepared, their exits await real testers, installs and buyers
 
 > **Mission:** Help individual AI-assisted developers coordinate parallel coding tasks, detect cross-task integration risks before merging, and hand off verified work with minimal setup.
 >

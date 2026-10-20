@@ -1,0 +1,21 @@
+# Changelog
+
+## 0.1.0 — 2026-10-20
+
+First public release.
+
+### guardian CLI 0.1.0
+- `inspect`: branch, head, base, every worktree with uncommitted / committed-since-base counts, locks, in-flight git operations, task ↔ worktree map.
+- `task add|done|list`: task-level path ownership in `.guardian/tasks.json`, previewed and confirmed before writing, atomic write.
+- `check`: declared overlaps, same path changed in two worktrees, paths owned by another task, paths outside a task's claim, hotspot categories (lockfiles, migrations, schemas, generated, routes, config), behind base, in-flight operations, unresolved conflicts, stale tasks; suggested merge order; `--strict` exits 3 on risks; `--json` with `schemaVersion: 1`.
+- `handoff`: Markdown / JSON report with commits, changed paths, outside-claim marks, open risks, next steps; test evidence is `verified` only when guardian ran the tests (exit code + tree fingerprint), else `supplied, not verified` or `not verified`.
+
+### session-agents mod 0.15.0
+- `/task add|done|list` and `list_tasks`: task ownership shared across worktrees and sessions; an edit from another branch into an owned path is held and the user is asked.
+- Per-session files for claims and messages (no cross-session write races).
+- Prompt text shared with other sessions only behind an opt-in toggle (off by default).
+- Glob semantics fixed (`**` matches zero directories); edits recorded only after they succeed; peer branch cached; pid validation.
+- Everything from 0.13.0: `/sessions` pane, live session list, file claims, edit pause, peer messaging, usage and plan limits, notes, history.
+
+### scripts
+- `git-parallel-session-check.sh`: `UserPromptSubmit` hook warning about shared checkouts; fixed to work on macOS without `python`.

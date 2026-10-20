@@ -90,7 +90,7 @@ It never sends anything off your machine. It reads:
 - `<claude config>/projects/...`: session transcripts and subagent transcripts, to show each session's current task, last action, subagents, and token totals.
 - Your git repository, with read-only git commands.
 
-It writes task ownership to `<main worktree>/.guardian/tasks.json` in your repository, and everything else to `<claude config>/session-agents/` (`notes.json`, `history.json`, `pins.json`, `messages.json`, `prefs.json`, one claims file per session in `claims/`, and a small heartbeat file per session in `bus/`). `<claude config>` is `$CLAUDE_CONFIG_DIR` if set, otherwise `~/.claude`.
+It writes task ownership to `<main worktree>/.guardian/tasks.json` in your repository, and everything else to `<claude config>/session-agents/` (`notes.json`, `history.json`, `pins.json`, `messages.json`, `prefs.json`, one claims file per session in `claims/`, one messages file per session in `messages/`, and a small heartbeat file per session in `bus/`). `<claude config>` is `$CLAUDE_CONFIG_DIR` if set, otherwise `~/.claude`.
 
 Message text you send between sessions, and the file paths a session edits, are stored in those files in plain text. The first line of your prompt is shared with other sessions only if you switch on "share my prompt text" in the Actions tab (off by default).
 
@@ -119,7 +119,7 @@ In the **Actions** tab: pane theme (light page by default, readable on any termi
 - Dollar cost is shown for the current session only.
 - Token totals count what each transcript recorded, and are approximate.
 - A subagent counts as active if its transcript changed in the last minute.
-- Claims are written one file per session, so sessions never overwrite each other's claims. The other shared files (notes, pins, messages, history) are still written without locking.
+- Claims and messages are written one file per session, so sessions never overwrite each other's. Notes, pins and history are low-traffic shared files still written without locking.
 - The peer note in the system prompt does not run for plugins a person installs where an organization manages Claude Code; `list_peers` and `list_tasks` still work there.
 
 ## Troubleshooting

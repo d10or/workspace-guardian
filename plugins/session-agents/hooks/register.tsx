@@ -6,12 +6,12 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.14.1'
+const VERSION = '0.15.0'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
   home: '', cfg: '', sessions: '', projects: '', data: '', bus: '',
-  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '',
+  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '', msgsDir: '',
 }
 const MAX_MSGS = 200
 const MAX_HOPS = 4
@@ -191,10 +191,11 @@ async function ensurePaths($: any) {
   for (const name of ['notes', 'history', 'pins', 'prefs', 'claims'] as const) P[name] = `${P.data}/${name}.json`
   P.msgs = `${P.data}/messages.json`
   P.claimsDir = `${P.data}/claims`
+  P.msgsDir = `${P.data}/messages`
   S.isMac = os.trim() === 'Darwin'
   // One-time carry-over from the folder earlier versions kept their data in.
   await $.process
-    .run(['sh', '-c', 'mkdir -p "$1" "$1/claims"; for f in notes history pins messages prefs claims; do [ -f "$2/$f.json" ] && [ ! -f "$1/$f.json" ] && cp "$2/$f.json" "$1/$f.json"; done; true', 'sh', P.data, `${P.cfg}/lab-notes`])
+    .run(['sh', '-c', 'mkdir -p "$1" "$1/claims" "$1/messages"; for f in notes history pins messages prefs claims; do [ -f "$2/$f.json" ] && [ ! -f "$1/$f.json" ] && cp "$2/$f.json" "$1/$f.json"; done; true', 'sh', P.data, `${P.cfg}/lab-notes`])
     .catch(() => undefined)
 }
 
@@ -592,14 +593,39 @@ async function togglePin($: any, sessionId: string, name: string) {
   await setFlash($, next.length > list.length ? `Pinned "${name}"` : `Unpinned "${name}"`)
 }
 
-async function loadMsgs($: any): Promise<MessageRow[]> {
-  await ensurePaths($)
+const myMsgsFile = () => `${P.data}/messages/${S.sessionId}.json`
+
+async function readMsgFile($: any, path: string): Promise<MessageRow[]> {
   try {
-    const parsed = JSON.parse(await $.fs.read(P.msgs))
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = JSON.parse(await $.fs.read(path))
+    return Array.isArray(parsed) ? parsed.filter(m => m && typeof m.id === 'string') : []
   } catch {
     return []
   }
+}
+
+// Every session appends only to messages/<session>.json; all files plus the legacy messages.json are merged on read.
+async function loadMsgs($: any): Promise<MessageRow[]> {
+  await ensurePaths($)
+  const seen = new Set<string>()
+  const out: MessageRow[] = []
+  const add = (rows: MessageRow[]) => {
+    for (const m of rows) {
+      if (seen.has(m.id)) continue
+      seen.add(m.id)
+      out.push(m)
+    }
+  }
+  let names: string[] = []
+  try {
+    names = (await $.fs.list(P.msgsDir)).map((e: { name: string }) => e.name).filter((n: string) => n.endsWith('.json'))
+  } catch {
+    // no messages dir yet
+  }
+  for (const n of names) add(await readMsgFile($, `${P.msgsDir}/${n}`))
+  add(await readMsgFile($, P.msgs))
+
+  return out.sort((a, b) => a.at - b.at).slice(-MAX_MSGS)
 }
 
 async function syncMsgs($: any) {
@@ -627,16 +653,17 @@ async function recordPause($: any, now: number, rel: string, other: { sessionId:
 
 // The sender and the receiver both record a message under the same id, so it appears once.
 async function recordMsg($: any, row: MessageRow) {
-  const list = await loadMsgs($)
-  if (list.some(m => m.id === row.id)) return
-  const next = [...list, row].sort((a, b) => a.at - b.at).slice(-MAX_MSGS)
-  await $.fs.write(P.msgs, JSON.stringify(next))
-  await update($, msgsAtom, () => next)
+  const mine = await readMsgFile($, myMsgsFile())
+  if (mine.some(m => m.id === row.id)) return
+  await $.fs.write(myMsgsFile(), JSON.stringify([...mine, row].slice(-MAX_MSGS)))
+  await update($, msgsAtom, (old: MessageRow[]) => (old.some(m => m.id === row.id) ? old : [...old, row].sort((a, b) => a.at - b.at).slice(-MAX_MSGS)))
 }
 
 async function clearMsgs($: any) {
-  await $.fs.write(P.msgs, '[]')
-  await update($, msgsAtom, () => [])
+  // Clears this session's own file and the legacy shared file; other sessions' files are theirs.
+  await $.fs.write(myMsgsFile(), '[]')
+  await $.fs.write(P.msgs, '[]').catch(() => undefined)
+  await update($, msgsAtom, (old: MessageRow[]) => old.filter(m => m.fromId !== S.sessionId && m.toId !== S.sessionId))
   await setFlash($, 'Messages cleared')
 }
 
@@ -1296,9 +1323,9 @@ export const register: Register = on => {
     if (!S.isTimerOn) {
       S.isTimerOn = true
       $.clock.every(BEAT_MS, () => void tick($))
+      $.clock.every(30000, () => void usageTick($))
     }
     void usageTick($)
-    $.clock.every(30000, () => void usageTick($))
     await tick($)
 
     return next(e)

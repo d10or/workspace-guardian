@@ -92,3 +92,21 @@ test('/task add writes the shared tasks file and /task list reads it back', asyn
   expect(JSON.stringify(done)).toContain('marked done')
   expect(stored).toContain('"status": "done"')
 })
+
+test('a recorded message is written only to this session\'s own file', async ($, on) => {
+  mock.clock(on, { now: 1_790_000_000_000 })
+  const writes: string[] = []
+  on('fs.write', ($, e, next) => {
+    writes.push(e.path)
+    return { value: undefined }
+  })
+  on('fs.read', ($, e, next) => {
+    throw new Error('ENOENT')
+  })
+  on('fs.list', ($, e, next) => ({ value: [] }))
+  on('session.send', () => ({ value: { isDelivered: false, reason: 'no peer in tests' } }))
+  // /tell with no matching peer never writes; the tool path records a pause-type row via recordMsg
+  const out = await $.command.run({ command: 'tell', args: 'nobody hi' })
+  expect(JSON.stringify(out)).toContain('No parallel session')
+  expect(writes.filter(p => p.endsWith('/messages.json')).length).toBe(0)
+})

@@ -29,7 +29,9 @@ runs the hook on a clean and a staged temp repo and checks the JSON), finding 9 
 15 s), finding 10 (prompt text shared only with the new "share my prompt text" toggle, off by
 default), finding 11 pid validation. Live test on 2026-10-20: a task owning `docs/**` on another
 branch held an edit from `main` and the user answered "Allow this task for the session"; the pause
-was logged. Still open: 8 (README note), rest of 11 (version-match test, timer guard).
+was logged. **v0.15.0:** messages per session (finding 4 complete for the two contended files), timer guard, CI step
+asserting `plugin.json` version = `VERSION`, README note for finding 8. All eleven findings closed
+or consciously deferred (notes/pins/history stay shared: low traffic).
 
 ## Findings, most important first
 

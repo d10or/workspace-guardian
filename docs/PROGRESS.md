@@ -2,6 +2,22 @@
 
 Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or command, never a claim.
 
+## 2026-10-20 (later) — G2 closed; G3–G6 prepared
+
+- **G2 closed.** Evidence: `docs/SAFETY_AUDIT.md` (P0 criteria row by row), 19 CLI tests + 16 mod
+  tests + hook test green locally and in CI on ubuntu + macos, `demo/scenarios.sh` runs all three
+  demo scenarios, mod v0.15.0 (G2-08 done), release tag v0.1.0.
+- **G3 prepared, not closed.** `docs/ALPHA_GUIDE.md`, `docs/ALPHA_OUTREACH.md` with six named
+  target threads and the message. Exit criterion (4 of 5 real testers complete the workflow, 0
+  safety events) requires people; nothing internal can satisfy it.
+- **G4 prepared, not closed.** Public MIT repo, `CHANGELOG.md`, `docs/PRIVACY.md`,
+  `docs/RELEASE_CHECKLIST.md`, issue templates, tagged release. Exit needs the Anthropic directory
+  submission (founder's claude.ai account), posted demo clips, and ≥ 50 measured installs.
+- **G5 prepared, not closed.** `docs/PRICING.md`: free/Pro boundary, two price messages ($9 one-time
+  vs $4/month), checkout and refund plan, license-key design. Exit needs the Pro build, a live
+  checkout, and ≥ 3 real buyers.
+- **G6 template ready.** `docs/DECISION_MEMO.md`. Exit is the dated decision on 2026-11-29.
+
 ## 2026-10-20 — G2 in progress
 
 - **Done:** license MIT; repository public at https://github.com/d10or/workspace-guardian; first push

@@ -36,5 +36,10 @@ jobs:
         with:
           node-version: 24
       - run: npm install -g @anthropic-ai/claude-code
+      - name: plugin.json version matches the VERSION constant in register.tsx
+        run: |
+          J=$(node -p "require('./plugins/session-agents/.claude-plugin/plugin.json').version")
+          T=$(grep -oE "const VERSION = '[^']+'" plugins/session-agents/hooks/register.tsx | sed "s/.*'\(.*\)'/\1/")
+          echo "plugin.json=$J register.tsx=$T"; test "$J" = "$T"
       - run: claude plugin validate plugins/session-agents
       - run: claude plugin test plugins/session-agents
