@@ -5,11 +5,12 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"
 GUARDIAN="node $HERE/src/index.ts"
-DEMO="$(mktemp -d "${TMPDIR:-/tmp}/guardian-demo-XXXXXX")"
+DEMO="$(mktemp -d "${DEMO_TMP:-${TMPDIR:-/tmp}}/guardian-demo-XXXXXX")"
 export GIT_AUTHOR_NAME=demo GIT_AUTHOR_EMAIL=demo@example.com GIT_COMMITTER_NAME=demo GIT_COMMITTER_EMAIL=demo@example.com
 
-say() { printf '\n\033[1;36m$ %s\033[0m\n' "$*"; }
-run() { say "$*"; (cd "$CWD" && eval "$*"); }
+# DEMO_PAUSE=<seconds> slows the script down for recordings (default 0).
+say() { printf '\n\033[1;36m$ %s\033[0m\n' "${*//$GUARDIAN/guardian}"; sleep "${DEMO_PAUSE:-0}"; }
+run() { say "$*"; (cd "$CWD" && eval "$*"); sleep "${DEMO_PAUSE:-0}"; }
 
 MAIN="$DEMO/app"; mkdir -p "$MAIN"
 git -C "$DEMO" init -q -b main app
@@ -23,7 +24,7 @@ git -C "$MAIN" worktree add -q -b feature/auth "$DEMO/wt-auth"
 git -C "$MAIN" worktree add -q -b feature/api "$DEMO/wt-api"
 
 which="${1:-all}"
-echo "demo repo: $MAIN  (worktrees: wt-auth, wt-api)"
+[ -n "${DEMO_QUIET:-}" ] || echo "demo repo: $MAIN  (worktrees: wt-auth, wt-api)"
 
 if [ "$which" = clean ] || [ "$which" = all ]; then
   echo; echo "================ scenario 1: clean repo, two well-separated tasks ================"
@@ -58,4 +59,4 @@ if [ "$which" = handoff ] || [ "$which" = all ]; then
   run "$GUARDIAN handoff --task AUTH --run 'node -e process.exit(0)' | head -12"
 fi
 
-echo; echo "demo files are under $DEMO (delete when done)"
+[ -n "${DEMO_QUIET:-}" ] && rm -rf "$DEMO" || { echo; echo "demo files are under $DEMO (delete when done)"; }

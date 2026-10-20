@@ -4,6 +4,9 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-20 (later) — G2 closed; G3–G6 prepared
 
+- **Done:** three terminal demo clips recorded with `demo/record.sh` (asciinema + agg), approved by
+  the founder, embedded in the README. The in-Claude-Code Allow / Deny clip remains to be recorded by hand.
+
 - **G2 closed.** Evidence: `docs/SAFETY_AUDIT.md` (P0 criteria row by row), 19 CLI tests + 16 mod
   tests + hook test green locally and in CI on ubuntu + macos, `demo/scenarios.sh` runs all three
   demo scenarios, mod v0.15.0 (G2-08 done), release tag v0.1.0.

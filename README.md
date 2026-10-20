@@ -7,6 +7,22 @@ collide, and hand off work with evidence of what was actually tested.
 **Status:** G1 desk research done (`docs/RESEARCH_G1.md`). G2 prototype starts from the existing
 session-agents mod. See `docs/MASTER_PLAN.md` for the plan and `docs/MOD_REVIEW.md` for the review.
 
+## See it
+
+**Risky overlap caught before merge.** Two tasks claim the same path, the same file is changed in two worktrees, and two migrations under different names are flagged as one hotspot. Every finding ends with a fix; `--strict` exits 3.
+
+![guardian check finding overlaps across worktrees](demo/recordings/risky.gif)
+
+**Clean repo.** Two well-separated tasks, each mapped to its worktree, and a suggested merge order.
+
+![guardian inspect and check on a clean repo](demo/recordings/clean.gif)
+
+**Evidence-based handoff.** The report says **not verified** until guardian ran the tests itself, then records the exit code and a fingerprint of the tree they ran on.
+
+![guardian handoff before and after running tests](demo/recordings/handoff.gif)
+
+Reproduce them with `bash demo/scenarios.sh` (see `docs/DEMO.md`).
+
 ## What is here today
 
 | Path | What it is |
