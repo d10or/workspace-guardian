@@ -96,10 +96,11 @@ npm run build && node dist/index.js --help
 ## Layout
 
 ```
+.claude/            project settings (SessionStart hook) and skills: /checkpoint, /resume, /gate
 .claude-plugin/     marketplace manifest
 plugins/            Claude Code plugins and mods
 scripts/            shell hooks
-docs/               plan, research, review, tracker, playbook, provenance, archive
+docs/               plan, research, checkpoint (living state), progress log, tracker, audits, guides
 src/                CLI source (TypeScript, ESM)
 tests/              node:test suites and fixtures
 .guardian/          local task state, git-ignored
