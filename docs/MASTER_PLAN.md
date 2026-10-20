@@ -253,6 +253,8 @@ preflight ownership layer first; integrate with Radar rather than compete if it 
 v0.13.0 (see `MOD_REVIEW.md`). Owner: founder. New target: G2 starts from the mod, not from an
 empty CLI. Founder decision 2026-10-20: H1 (problem frequency) is treated as validated by the sourced desk research plus the founder's own parallel-session incidents, which produced the session-agents mod and the shared-checkout hook. Scheduled problem interviews are dropped. Developer feedback from here on comes from alpha testers at G3 and from public issue trackers, not from a separate interview round.
 
+**License decision (founder, 2026-10-20):** the free core is source-available under PolyForm Shield 1.0.0, not open-source: anyone may use and modify it, including at work, but may not use it to provide a competing product. All paid features are developed in the private repository `d10or/workspace-guardian-pro` and shipped as license-gated builds. Risk R7 note: MIT applied for a few hours with no recorded clones. The awesome-claude-code channel is dropped; the Anthropic directory remains available.
+
 **Pricing direction (founder, 2026-10-20):** do not anchor on $29. Aim for a low price and volume:
 a small one-time price in the $5–$12 band, or a few dollars a month, so that doubling a small user
 count still produces meaningful revenue and the purchase is impulse-sized for someone already paying

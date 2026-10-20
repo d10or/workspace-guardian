@@ -19,7 +19,7 @@ I run two or three Claude Code sessions on one repo, each in its own worktree. W
 
 Anthropic's docs say "give each teammate different files." There was nothing that checks that. So I built it.
 
-**Workspace Guardian** is a Claude Code mod plus a CLI. MIT, local only, no account, no network.
+**Workspace Guardian** is a Claude Code mod plus a CLI. Free to use, source-available, local only, no account, no network.
 
 - `/task add AUTH 'src/auth/**' --branch feature/auth` declares that a task owns those paths. The declaration lives in the repo, so every worktree and every later session sees it.
 - If a session on another branch tries to edit an owned file, the edit is held and you get an Allow / Deny question before anything lands.
@@ -46,7 +46,7 @@ macOS and Linux. Windows not yet. I would value hearing which findings are true 
 
 I run several AI coding sessions in parallel on one repo. Worktrees isolate the files but only defer the conflict to merge time, and the agents' "done, tests pass" summaries are often untrue at the moment they are made (I measured 35% stale or false on my own sessions before building this; a 716-merge study found a 41.7% textual conflict rate between PRs from different agents).
 
-Guardian is a small MIT CLI plus a Claude Code plugin. You declare which task owns which paths on which branch; that lives in `.guardian/tasks.json` in the repo. From there:
+Guardian is a small source-available CLI (PolyForm Shield) plus a Claude Code plugin. You declare which task owns which paths on which branch; that lives in `.guardian/tasks.json` in the repo. From there:
 
 - the plugin holds an edit from another branch into an owned path and asks you;
 - `guardian check` reports declared overlaps, same-path changes across worktrees, scope violations, hotspot categories (two migrations with different names count as one), stale base, in-flight git ops, each with a remediation and a suggested merge order;
@@ -101,9 +101,9 @@ Pre-submission check (docs/plugins/pre-submission-checklist): public repo ✔, L
 
 ---
 
-## 5. awesome-claude-code (after 2026-11-03, 14 days of commits)
+## 5. awesome-claude-code — not applicable
 
-Submit via the issue form only. Category: Agent Orchestration. One line:
+The list rejects projects that are not open-source or that gate features behind payment; PolyForm Shield is source-available, not OSI open-source. Skip. (Kept for the record:)
 "Workspace Guardian — task-level path ownership and preflight collision checks for parallel Claude Code sessions; local CLI + mod, MIT."
 
 ---
@@ -114,4 +114,4 @@ Submit via the issue form only. Category: Agent Orchestration. One line:
 - "What about Conductor / Claude Squad?" — Session managers. Guardian sits beside them; it does not launch sessions.
 - "Can an agent bypass the hold?" — Through the Edit/Write tools, no. Through a shell `cp` or redirect, yes; the same blind spot Claude Code's own guard documents. `guardian check` sees it afterwards via git.
 - "Windows?" — Not yet. Say if you need it; that decides whether it gets built.
-- "Is it free?" — The core is MIT and stays so. A small paid tier may come later for merge planning and CI policies.
+- "Is it free?" — The core is free to use and modify, including at work, under PolyForm Shield: the one thing you may not do is ship it as a competing product. A small paid tier may come later for merge planning and CI policies.

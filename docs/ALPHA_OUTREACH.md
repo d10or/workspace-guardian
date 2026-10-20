@@ -18,7 +18,7 @@ unless they reply.
 ## Message (GitHub issue comment or forum reply; adapt the first line)
 
 > You described [the overwrite / handoff / ownership problem] in this thread. I built a small,
-> local, MIT-licensed tool for it and would value 20 minutes of your judgment before I show it to
+> local, free-to-use, source-available tool for it and would value 20 minutes of your judgment before I show it to
 > anyone else. It lets you declare which task owns which paths, holds an edit from another session
 > that crosses that line and asks you, reports overlap across worktrees before you merge, and
 > writes a handoff that only says "verified" when it ran your tests itself. No account, no

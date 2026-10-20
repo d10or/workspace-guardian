@@ -2,12 +2,14 @@
 
 Founder direction (2026-10-20): low price, volume. The purchase must be impulse-sized for someone
 already paying $100–$200 a month for Claude. The plugin catalog has no payment mechanism, so Pro is
-enforced by the CLI and mod reading a license file; the free core stays MIT and fully usable, which
-awesome-claude-code requires.
+enforced by the CLI and mod reading a license file. The free core is source-available under PolyForm
+Shield 1.0.0 (founder decision 2026-10-20): anyone may use and modify it, nobody may use it to provide a
+competing product. This rules out the awesome-claude-code listing, which rejects payment-required and
+non-open-source projects; the Anthropic directory has no open-source requirement.
 
 ## Boundary
 
-| Free (MIT, forever) | Pro (one-time license) |
+| Free (PolyForm Shield, source-available, forever) | Pro (proprietary, private repo, one-time license) |
 |---|---|
 | `/sessions` control tower, live session list, claims, edit pause, peer messaging | Merge-order planner with per-task risk score and the exact rebase sequence |
 | `/task` ownership with the ask-the-user hold | Hotspot packs beyond the built-in six categories (framework-specific: Next.js routes, Django apps, Rails, monorepo workspaces) and custom hotspot rules per repo |

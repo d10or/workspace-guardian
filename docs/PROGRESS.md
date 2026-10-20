@@ -4,6 +4,8 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-20 (later) — G2 closed; G3–G6 prepared
 
+- **Decision (D6):** founder requires that nobody can take the project and offer it as their own. Public repo relicensed from MIT to PolyForm Shield 1.0.0 (use and modify freely, no competing products); GitHub traffic showed 0 clones / 0 forks at the time. Private repo `workspace-guardian-pro` created for all paid features. awesome-claude-code channel dropped.
+
 - **Done:** launch post drafts (`docs/LAUNCH_POSTS.md`) and the alpha feedback issue template (G4-03 prep).
 
 - **Done:** three terminal demo clips recorded with `demo/record.sh` (asciinema + agg), approved by

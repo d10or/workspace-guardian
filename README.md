@@ -29,6 +29,7 @@ Reproduce them with `bash demo/scenarios.sh` (see `docs/DEMO.md`).
 |---|---|
 | `plugins/session-agents/` | Working Claude Code mod v0.15.0: `/sessions` control pane, `/task` ownership shared across worktrees with an ask-the-user hold on violations, live session list, file claims, edit pause, peer messaging, git/worktree view. Docs in `docs/SESSION_AGENTS_MOD.md`. |
 | `.claude-plugin/marketplace.json` | Makes this repository a plugin marketplace. |
+| `LICENSE` | PolyForm Shield 1.0.0: free to use, including at work, and to modify; not permitted to use it to provide a competing product. Paid features live in a separate private repository. |
 | `scripts/git-parallel-session-check.sh` | `UserPromptSubmit` hook that warns when another session shares this checkout. |
 | `src/` | `guardian` CLI skeleton (TypeScript). Commands are stubs until G2. |
 | `docs/` | Master plan, G1 research, mod review, execution tracker, launch playbook. |

@@ -15,7 +15,7 @@
 ## Decisions that must not be re-litigated
 - Interviews dropped; H1 accepted on desk research + founder incidents (2026-10-20).
 - Wedge = task ownership + preflight overlap; handoff/merge-readiness are fast-follow (Radar exists).
-- MIT, public repo, low-price volume pricing ($9 one-time vs $4/month to test at G5).
+- License: PolyForm Shield 1.0.0 (source-available, noncompete) on the public repo since 2026-10-20, superseding MIT the same day with 0 clones recorded. Pro lives in the private repo `d10or/workspace-guardian-pro`. Low-price volume pricing ($9 one-time vs $4/month) to test at G5. awesome-claude-code listing dropped.
 - The mod is installed from GitHub (`d10or/workspace-guardian`), not the local folder.
 
 ## State of the code
