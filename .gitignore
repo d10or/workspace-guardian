@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+# Local demo/runtime state only; never commit real task state
+.guardian/*
+!.guardian/README.md
+# Source archive the project was bootstrapped from
+*.zip
+# written by Claude Code when a mod loads; regenerated each time
+plugins/*/.claude-plugin/types/

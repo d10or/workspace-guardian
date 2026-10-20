@@ -1,0 +1,14 @@
+{
+  "name": "workspace-guardian",
+  "description": "Workspace Guardian: preflight coordination for parallel Claude Code sessions on one repository.",
+  "owner": {
+    "name": "Dor Azulay"
+  },
+  "plugins": [
+    {
+      "name": "session-agents",
+      "description": "A pane (/sessions) and tools for working with several Claude Code sessions at once: live session list, git/worktree view, token and plan-limit usage, notes, history, file claims, and peer messaging.",
+      "source": "./plugins/session-agents"
+    }
+  ]
+}

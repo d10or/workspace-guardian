@@ -1,0 +1,26 @@
+{
+  "name": "workspace-guardian",
+  "version": "0.1.0",
+  "description": "Preflight task-overlap checks, explicit file/task ownership, and evidence-based handoff for parallel AI coding sessions on one repository.",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "guardian": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node src/index.ts",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "UNLICENSED"
+}
