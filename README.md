@@ -20,10 +20,10 @@ session-agents mod. See `docs/MASTER_PLAN.md` for the plan and `docs/MOD_REVIEW.
 ## Install the mod
 
 ```
-/plugin install session-agents --marketplace <owner>/<repo>
+/plugin install session-agents --marketplace d10or/workspace-guardian
 ```
 
-Then start a new session and type `/sessions`. Declare ownership with `/task add AUTH 'src/auth/**' --branch feature/auth`. Replace `<owner>/<repo>` once this repository is
+Then start a new session and type `/sessions`. Declare ownership with `/task add AUTH 'src/auth/**' --branch feature/auth`. Replace `d10or/workspace-guardian` once this repository is
 pushed to GitHub.
 
 ## Install the shared-checkout hook

@@ -27,7 +27,7 @@ notes=()
 
 # --- 1. Other worktrees ----------------------------------------------------
 # --porcelain is line-oriented, so it survives the spaces these paths contain
-# ("OneDrive - NVIDIA Corporation"); the human format does not.
+# (for example "OneDrive - Some Company"); the human format does not.
 # Claude Code locks the worktrees it owns with "locked claude session <name>
 # (pid N)", which is a direct statement that a parallel session exists.
 wt_path=""; wt_branch=""; wt_lock=""

@@ -4,6 +4,8 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-20 — G2 in progress
 
+- **Decision:** license MIT; repository public at github.com/d10or/workspace-guardian (G2-06, G2-07).
+
 - **Done:** first commit on `main` (`8fe2c6b`). Repo identity set locally.
 - **Done:** `guardian` CLI v0.1: `inspect`, `task add|done|list`, `check`, `handoff` on the shared
   `.guardian/tasks.json`. Evidence: `npm test` (unit + end-to-end on a two-worktree fixture repo),
@@ -18,8 +20,7 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
   (Ubuntu + macOS CLI jobs; mod job runs `claude plugin validate|test`, allowed to fail until verified on CI).
 - **Decision:** interview round dropped; H1 accepted on desk research + founder incidents.
 - **Decision:** pricing moves to a low-price, volume model ($5–$12 one-time or a few $/month); two price points at G5.
-- **Owed for G2 exit:** push to GitHub and see CI green on both OSes; replace `<owner>/<repo>` in
-  README and INSTALL; choose a license (R7); record a demo (clean repo, risky overlap, safe handoff).
+- **Owed for G2 exit:** CI green on both OSes after the first push; record a demo (clean repo, risky overlap, safe handoff).
 
 ## 2026-10-17 — G1 closed
 

@@ -57,7 +57,7 @@ Each session also gets a short note in its system prompt listing the other live 
 You need Claude Code with plugin hooks ("mods"). It was built and tested on Claude Code 2.1.302.
 
 ```
-claude plugin marketplace add <path-or-git-url-of-this-repo>
+claude plugin marketplace add https://github.com/d10or/workspace-guardian
 claude plugin install session-agents@session-agents
 ```
 

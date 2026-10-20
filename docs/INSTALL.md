@@ -7,7 +7,7 @@ Everything runs locally. No account, no API key, no network access.
 Install from this repository's marketplace:
 
 ```
-/plugin install session-agents --marketplace <owner>/<repo>
+/plugin install session-agents --marketplace d10or/workspace-guardian
 ```
 
 Answer `y` to add the marketplace, then pick a scope (user is the usual choice). Start a new
