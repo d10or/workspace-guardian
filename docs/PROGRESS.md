@@ -4,6 +4,8 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-20 (later) — G2 closed; G3–G6 prepared
 
+- **Done:** launch post drafts (`docs/LAUNCH_POSTS.md`) and the alpha feedback issue template (G4-03 prep).
+
 - **Done:** three terminal demo clips recorded with `demo/record.sh` (asciinema + agg), approved by
   the founder, embedded in the README. The in-Claude-Code Allow / Deny clip remains to be recorded by hand.
 

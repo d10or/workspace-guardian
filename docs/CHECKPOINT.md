@@ -5,13 +5,12 @@
 ## In progress / blocked
 - G3-02 alpha outreach: message and targets in `docs/ALPHA_OUTREACH.md`; **founder sends**. 0 of 5 testers so far.
 - G2-09 fourth clip (Allow / Deny inside Claude Code): founder records by hand.
-- G4 launch: directory submission, Reddit, Show HN, X posts are the founder's; drafts not yet written (`docs/LAUNCH_POSTS.md` offered).
+- G4 launch: posts drafted in `docs/LAUNCH_POSTS.md` (Reddit, Show HN, X thread, directory submission, awesome-claude-code line, reply guide); **founder posts**. Alpha feedback issue template added.
 
 ## Next engineering work (in order)
-1. `docs/LAUNCH_POSTS.md` drafts + "Alpha feedback" issue template.
-2. Opt-in anonymous usage counter in the mod (off by default; counts only, no paths) for G6 metrics.
-3. Pro features for G5 behind an offline license key: merge-order planner with risk score, per-repo `--strict` policies, custom hotspot rules (`docs/PRICING.md`).
-4. Verify the mod on the desktop app and VS Code surfaces.
+1. Opt-in anonymous usage counter in the mod (off by default; counts only, no paths) for G6 metrics.
+2. Pro features for G5 behind an offline license key: merge-order planner with risk score, per-repo `--strict` policies, custom hotspot rules (`docs/PRICING.md`).
+3. Verify the mod on the desktop app and VS Code surfaces.
 
 ## Decisions that must not be re-litigated
 - Interviews dropped; H1 accepted on desk research + founder incidents (2026-10-20).
