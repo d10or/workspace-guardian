@@ -29,8 +29,7 @@ jobs:
   mod:
     name: session-agents mod
     runs-on: ubuntu-latest
-    # `claude plugin validate|test` run offline, but the CLI itself must be installed first.
-    continue-on-error: true
+    # `claude plugin validate|test` run offline once the CLI is installed; proven on run 39390316230.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
