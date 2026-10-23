@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.1 (CLI) / 0.17.0 (mod) — 2026-10-23
+- Windows support: CLI path comparisons are separator- and case-insensitive on Windows; `handoff --run` goes through the shell there so npm shims resolve; CI runs on windows-latest. Mod: PowerShell fallbacks for home/config detection, directory creation, transcript tail and process liveness; `python` fallback for `python3`; Windows-safe relative paths for holds and claims.
+
 ## 0.2.0 (CLI) — 2026-10-23
 - `guardian pro install <tarball> | status | remove`: installs the paid package under the guardian home; validates it is a Workspace Guardian Pro archive first.
 - `guardian license add|show|remove`: optional offline Pro key (Ed25519, public key embedded, never phones home).

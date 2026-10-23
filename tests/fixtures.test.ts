@@ -8,7 +8,7 @@ import { guardian, repoWithWorktrees, sh, write } from "./fixture.ts";
 
 const codes = (cwd: string, ...extra: string[]) => guardian(cwd, "check", "--json", ...extra).json().findings.map((f: any) => f.code) as string[];
 
-test("fixture: symlink and deleted file count as changes, symlink target is not followed", () => {
+test("fixture: symlink and deleted file count as changes, symlink target is not followed", { skip: process.platform === "win32" ? "symlinks need a privilege on Windows" : false }, () => {
   const { main, auth } = repoWithWorktrees();
   guardian(main, "task", "add", "--id", "AUTH", "--paths", "src/auth/**", "--branch", "feature/auth", "--yes");
   symlinkSync("../../docs/x.md", path.join(auth, "src/auth/link.md"));

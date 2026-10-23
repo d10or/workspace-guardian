@@ -34,7 +34,7 @@ GIF of a collision being caught: [link]
 Install (Claude Code 2.1.287+): `/plugin install session-agents --marketplace d10or/workspace-guardian`
 CLI: clone, `npm install && npm run build && npm link`.
 
-macOS and Linux. Windows not yet. I would value hearing which findings are true risks and which are noise on your repos; the check is deliberately conservative and labelled advisory.
+macOS, Linux and Windows. I would value hearing which findings are true risks and which are noise on your repos; the check is deliberately conservative and labelled advisory.
 
 ---
 
@@ -113,5 +113,5 @@ The list rejects projects that are not open-source or that gate features behind 
 - "Doesn't `claude --worktree` already do this?" — It isolates files; it does not know what each session is supposed to own, and it blocks edits into the main checkout only. Guardian adds the declaration and checks between worktrees.
 - "What about Conductor / Claude Squad?" — Session managers. Guardian sits beside them; it does not launch sessions.
 - "Can an agent bypass the hold?" — Through the Edit/Write tools, no. Through a shell `cp` or redirect, yes; the same blind spot Claude Code's own guard documents. `guardian check` sees it afterwards via git.
-- "Windows?" — Not yet. Say if you need it; that decides whether it gets built.
+- "Windows?" — Yes, since 0.17.0 / CLI 0.2.1; CI runs on windows-latest. The Jump-to-terminal button is macOS-only.
 - "Is it free?" — The core is free to use and modify, including at work, under PolyForm Shield: the one thing you may not do is ship it as a competing product. A small paid tier may come later for merge planning and CI policies.

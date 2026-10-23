@@ -2,6 +2,14 @@
 
 Everything runs locally. No account, no API key, no network access.
 
+## Platforms
+
+| | CLI | mod | hook |
+|---|---|---|---|
+| macOS | yes (CI) | yes | yes |
+| Linux | yes (CI) | yes (CI) | yes |
+| Windows 10/11 | yes (CI); needs Git for Windows and Node 22+; `tar` ships with Windows | yes from 0.17.0 (PowerShell is used where Unix tools are missing); Jump to terminal is macOS-only | runs under Git Bash: point the settings command at `"C:\\Program Files\\Git\\bin\\bash.exe"` |
+
 ## session-agents mod (Claude Code 2.1.287 or later)
 
 Install from this repository's marketplace:
@@ -72,4 +80,4 @@ Uninstall: remove that entry and delete the script. Check it works with `bash te
 - **The pane is blank:** Claude Code prints a dim `session-agents: ...` line in the transcript naming the failing hook.
 - **`guardian inspect` says "base unknown":** the repo has no `origin` and no `main`/`master`. Pass `--base <ref>`.
 - **The hook prints nothing:** that is normal on a quiet repo. It needs `python3` or `python` for JSON output; without either it prints the warning as plain text on stderr.
-- **Windows:** not supported. The mod shells out to `sh`, `ps` and `tail`; the CLI is untested there.
+- **Windows:** `handoff --run` runs your test command through `cmd.exe` so that `npm`/`npx` shims resolve; everything else is shell-free. If the mod shows no peers, confirm `powershell` and `tasklist` are on PATH (they are by default).

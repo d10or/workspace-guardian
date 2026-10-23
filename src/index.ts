@@ -70,7 +70,7 @@ export async function main(argv: readonly string[]): Promise<number> {
       process.stdout.write(USAGE);
       return 0;
     case "--version":
-      process.stdout.write("guardian 0.2.0\n");
+      process.stdout.write("guardian 0.2.1\n");
       return 0;
     default:
       process.stderr.write(`Unknown command: ${command}\n\n${USAGE}`);

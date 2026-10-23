@@ -1,6 +1,6 @@
 {
   "name": "session-agents",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Pane of this session's agents plus awareness of parallel Claude sessions on the same git project, task-level path ownership (/task), file claims, and /tell to message peers.",
   "types": "./types/index.d.ts",
   "author": {

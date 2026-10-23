@@ -22,7 +22,8 @@ out="$(bash "$HOOK")"; code=$?
 [ "$code" -eq 0 ] || fail "staged repo: exit $code"
 printf '%s' "$out" | grep -q '"hookEventName": "UserPromptSubmit"' || fail "staged repo: no hook JSON, got: $out"
 printf '%s' "$out" | grep -q 'ALREADY STAGED' || fail "staged repo: warning missing, got: $out"
-printf '%s' "$out" | python3 -I -c 'import json,sys; json.load(sys.stdin)' || fail "staged repo: output is not valid JSON"
+PY="$(command -v python3 || command -v python)"
+printf '%s' "$out" | "$PY" -c 'import json,sys; json.load(sys.stdin)' || fail "staged repo: output is not valid JSON"
 
 touch .git/index.lock
 out="$(bash "$HOOK")"

@@ -6,7 +6,7 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.16.0'
+const VERSION = '0.17.0'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
@@ -67,7 +67,7 @@ const fixUi = (u: Partial<UiState> | null | undefined): UiState => ({
   detail: u?.detail ?? [],
 })
 
-const ACTIONS: { key: string; label: string; argv: string[]; where: 'here' | 'any' }[] = [
+const ACTIONS_UNIX: { key: string; label: string; argv: string[]; where: 'here' | 'any' }[] = [
   { key: 'log', label: 'Recent commits', argv: ['git', 'log', '--oneline', '--decorate', '-n', '12'], where: 'here' },
   { key: 'branches', label: 'Recent branches', argv: ['git', 'for-each-ref', '--sort=-committerdate', '--count=15', '--exclude=refs/remotes/origin/HEAD', '--format=%(committerdate:relative)  %(refname:short)', 'refs/heads', 'refs/remotes'], where: 'here' },
   { key: 'diff', label: 'Diff summary', argv: ['git', 'diff', '--stat'], where: 'here' },
@@ -77,6 +77,12 @@ const ACTIONS: { key: string; label: string; argv: string[]; where: 'here' | 'an
   { key: 'procs', label: 'Claude processes', argv: ['pgrep', '-fl', 'claude'], where: 'any' },
   { key: 'prs', label: 'Open PRs (gh)', argv: ['gh', 'pr', 'list', '--limit', '10'], where: 'here' },
 ]
+const ACTIONS_WIN = ACTIONS_UNIX.map(a =>
+  a.key === 'disk' ? { ...a, argv: ['powershell', '-NoProfile', '-Command', 'Get-PSDrive -PSProvider FileSystem | Select-Object Name,Used,Free | Format-Table -AutoSize'] }
+  : a.key === 'procs' ? { ...a, argv: ['tasklist', '/FI', 'IMAGENAME eq claude.exe', '/FO', 'TABLE', '/NH'] }
+  : a,
+)
+const ACTIONS = () => (S.isWin ? ACTIONS_WIN : ACTIONS_UNIX)
 
 type Beat = { sessionId: string; files: string[]; editAt?: Record<string, number>; prompt: string; updatedAt: number }
 
@@ -119,6 +125,8 @@ const S = {
   tickNo: 0,
   baseRef: '',
   isMac: false,
+  isWin: false,
+  py: '' as string,
   pyFailed: false,
 }
 
@@ -177,10 +185,16 @@ function paint(node: any, pal: Palette): any {
 
 async function ensurePaths($: any) {
   if (P.home !== '') return
-  const r = await $.process
+  // Unix first; where `sh` is missing (Windows) ask PowerShell for the same three values.
+  let r = await $.process
     .run(['sh', '-c', 'printf "%s\n%s\n%s" "$HOME" "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" "$(uname)"'])
     .catch(() => undefined)
-  const [home = '', cfg = '', os = ''] = r && r.exitCode === 0 ? (r.stdout as string).split('\n') : []
+  if (!r || r.exitCode !== 0) {
+    r = await $.process
+      .run(['powershell', '-NoProfile', '-Command', '$h=$env:USERPROFILE; $c=$env:CLAUDE_CONFIG_DIR; if(-not $c){$c="$h\\.claude"}; Write-Output $h; Write-Output $c; Write-Output Windows_NT'])
+      .catch(() => undefined)
+  }
+  const [home = '', cfg = '', os = ''] = r && r.exitCode === 0 ? (r.stdout as string).replace(/\r/g, '').split('\n').map((x: string) => x.replace(/\\/g, '/')) : []
   if (home === '') return
   P.home = home
   P.cfg = cfg || `${home}/.claude`
@@ -194,6 +208,13 @@ async function ensurePaths($: any) {
   P.msgsDir = `${P.data}/messages`
   P.usageDir = `${P.cfg}/guardian/usage`
   S.isMac = os.trim() === 'Darwin'
+  S.isWin = os.trim() === 'Windows_NT'
+  if (S.isWin) {
+    await $.process
+      .run(['powershell', '-NoProfile', '-Command', `New-Item -ItemType Directory -Force -Path '${P.data}','${P.data}/claims','${P.data}/messages','${P.cfg}/guardian/usage' | Out-Null`])
+      .catch(() => undefined)
+    return
+  }
   // One-time carry-over from the folder earlier versions kept their data in.
   await $.process
     .run(['sh', '-c', 'mkdir -p "$1" "$1/claims" "$1/messages" "$3"; for f in notes history pins messages prefs claims; do [ -f "$2/$f.json" ] && [ ! -f "$1/$f.json" ] && cp "$2/$f.json" "$1/$f.json"; done; true', 'sh', P.data, `${P.cfg}/lab-notes`, `${P.cfg}/guardian/usage`])
@@ -270,8 +291,10 @@ async function readActivity($: any, r: { sessionId: string; cwd: string }, now: 
   let task = ''
   let activity = ''
   const file = `${P.projects}/${r.cwd.replace(/[^a-zA-Z0-9]/g, '-')}/${r.sessionId}.jsonl`
-  const out = await $.process.run(['tail', '-c', '120000', file]).catch(() => undefined)
-  const lines = out && out.exitCode === 0 ? (out.stdout as string).split('\n').reverse() : []
+  const out = await $.process
+    .run(S.isWin ? ['powershell', '-NoProfile', '-Command', `Get-Content -LiteralPath '${file}' -Tail 80 -Encoding UTF8`] : ['tail', '-c', '120000', file])
+    .catch(() => undefined)
+  const lines = out && out.exitCode === 0 ? (out.stdout as string).replace(/\r/g, '').split('\n').reverse() : []
   for (const line of lines) {
     if (task !== '' && activity !== '') break
     let row: any
@@ -363,13 +386,21 @@ async function tick($: any) {
     if (typeof mine?.name === 'string') S.myName = mine.name
     if (typeof mine?.cwd === 'string') S.myCwd = mine.cwd
     const candidates = regs.filter(r => r.sessionId !== S.sessionId && r.spare !== true && Number.isInteger(r.pid) && r.pid > 0)
-    const ps = candidates.length
-      ? await $.process.run(['ps', '-o', 'pid=,tty=', '-p', candidates.map(r => r.pid).join(',')]).catch(() => undefined)
-      : undefined
     const ttyOf = new Map<number, string>()
-    for (const line of ((ps?.stdout as string) ?? '').split('\n')) {
-      const [pid, tty = ''] = line.trim().split(/\s+/)
-      if (Number(pid)) ttyOf.set(Number(pid), tty === '??' ? '' : tty)
+    if (candidates.length && S.isWin) {
+      // tasklist CSV: "Image Name","PID",... — one call for every process, then keep the candidates.
+      const tl = await $.process.run(['tasklist', '/FO', 'CSV', '/NH']).catch(() => undefined)
+      const wanted = new Set(candidates.map(r => r.pid))
+      for (const line of ((tl?.stdout as string) ?? '').split('\n')) {
+        const pid = Number(line.split('","')[1])
+        if (wanted.has(pid)) ttyOf.set(pid, '')
+      }
+    } else if (candidates.length) {
+      const ps = await $.process.run(['ps', '-o', 'pid=,tty=', '-p', candidates.map(r => r.pid).join(',')]).catch(() => undefined)
+      for (const line of ((ps?.stdout as string) ?? '').split('\n')) {
+        const [pid, tty = ''] = line.trim().split(/\s+/)
+        if (Number(pid)) ttyOf.set(Number(pid), tty === '??' ? '' : tty)
+      }
     }
     const alive = new Set<number>(ttyOf.keys())
 
@@ -802,11 +833,19 @@ async function saveClaims($: any, change: (list: ClaimRow[]) => ClaimRow[]) {
 }
 
 // Paths are kept relative to the repo root so a claim matches the same file in every worktree.
-function normPath(raw: string) {
-  let x = raw.trim()
-  if (S.root !== '' && x.startsWith(S.root + '/')) x = x.slice(S.root.length + 1)
+// Windows paths arrive with backslashes and any letter case; compare with forward slashes, case-folded.
+const fwd = (p: string) => p.replace(/\\/g, '/')
+function toRel(absOrRel: string) {
+  const x = fwd(absOrRel)
+  const root = fwd(S.root)
+  if (root === '') return x.replace(/^\/+/, '')
+  const prefix = root.endsWith('/') ? root : root + '/'
+  const hit = S.isWin ? x.toLowerCase().startsWith(prefix.toLowerCase()) : x.startsWith(prefix)
 
-  return x.replace(/^\.\//, '').replace(/\/+$/, '')
+  return hit ? x.slice(prefix.length) : x
+}
+function normPath(raw: string) {
+  return toRel(raw.trim()).replace(/^\.\//, '').replace(/\/+$/, '')
 }
 
 const claimMatches = (pattern: string, rel: string) => globMatches(pattern, rel)
@@ -872,7 +911,7 @@ async function recordUsage($: any, event: UsageEvent) {
 }
 
 // --- Task ownership (shared by every worktree of the repo) -----------------
-const tasksFile = () => taskFilePath(S.project || `${S.root}/.git`)
+const tasksFile = () => taskFilePath(fwd(S.project || `${S.root}/.git`))
 
 async function loadTasks($: any): Promise<TaskRow[]> {
   try {
@@ -993,7 +1032,14 @@ const USAGE_SCRIPT = [
 async function scanTranscript($: any, sessionId: string, cwd: string) {
   const prev = S.usageCache.get(sessionId) ?? { off: 0, inp: 0, out: 0, cc: 0, cr: 0, turns: 0, last: 0, model: '' }
   const file = `${P.projects}/${cwd.replace(/[^a-zA-Z0-9]/g, '-')}/${sessionId}.jsonl`
-  const r = await $.process.run(['python3', '-c', USAGE_SCRIPT, file, String(prev.off)], { timeoutMs: 90000 }).catch(() => undefined)
+  let r: any
+  for (const py of S.py !== '' ? [S.py] : ['python3', 'python']) {
+    r = await $.process.run([py, '-c', USAGE_SCRIPT, file, String(prev.off)], { timeoutMs: 90000 }).catch(() => undefined)
+    if (r && r.exitCode === 0) {
+      S.py = py
+      break
+    }
+  }
   S.pyFailed = !r || r.exitCode !== 0
   if (!r || r.exitCode !== 0) return prev
   try {
@@ -1129,7 +1175,7 @@ async function toggleNotify($: any, key: keyof Notify) {
 }
 
 async function runAction($: any, key: string) {
-  const a = ACTIONS.find(x => x.key === key)
+  const a = ACTIONS().find(x => x.key === key)
   if (a === undefined) return
   const r = await $.process.run(a.argv, { cwd: S.root, timeoutMs: 20000 }).catch(() => undefined)
   const text = r ? `${r.stdout}${r.exitCode === 0 ? '' : r.stderr}`.trim() : ''
@@ -1369,7 +1415,7 @@ export const register: Register = on => {
     const path = (e as { file_path?: unknown }).file_path
     const isEdit = e.tool === 'Edit' || e.tool === 'Write' || e.tool === 'MultiEdit' || e.tool === 'NotebookEdit'
     if (isEdit && typeof path === 'string') {
-      const rel = path.startsWith(S.root + '/') ? path.slice(S.root.length + 1) : path
+      const rel = toRel(path)
       const now: number = await $.clock.now()
 
       // Task ownership: a path owned by an active task on another branch is held while the user decides.
@@ -1925,7 +1971,7 @@ export const register: Register = on => {
     const actionsTab = [
       card('flt', 'Run (read-only)',
         <Box key="arow" flexWrap="wrap" gap={1}>
-          {ACTIONS.map(a => (
+          {ACTIONS().map(a => (
             <Button key={`act-${a.key}`} label={a.label} onPress={() => runAction($, a.key)} />
           ))}
         </Box>),

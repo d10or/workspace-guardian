@@ -76,9 +76,9 @@ To remove it: `claude plugin uninstall session-agents@session-agents`. Your save
 
 ## Requirements
 
-- macOS or Linux. Windows is not supported (the plugin shells out to `sh`, `ps`, `tail`).
+- macOS, Linux, or Windows 10/11 (from 0.17.0: PowerShell and `tasklist` replace `sh`, `ps`, `tail` where those are missing; the Jump button is macOS-only).
 - `git` for the Git tab and branch information.
-- `python3` (optional): used to total tokens from other sessions' transcripts. Without it, the Usage tab still shows plan limits and this session's context, and says so.
+- `python3` or `python` (optional): used to total tokens from other sessions' transcripts. Without it, the Usage tab still shows plan limits and this session's context, and says so.
 - iTerm2 or Terminal.app on macOS (optional): only for the **Jump** button. Elsewhere, or if you switch it off, Jump copies the command instead.
 - `gh` (optional): only for the "Open PRs" button.
 

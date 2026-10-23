@@ -4,6 +4,12 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
+- **Windows support (founder request):** CLI 0.2.1 and mod 0.17.0. CLI: separator/case-insensitive
+  path comparison, `handoff --run` via the shell on Windows, CI matrix now ubuntu + macos + windows.
+  Mod: PowerShell fallbacks (home/config, mkdir, transcript tail, process liveness), `python`
+  fallback, Windows-safe relative paths. Evidence: CI run on windows-latest (see Actions); no local
+  Windows machine was available, so the runner is the proof.
+
 - **Released:** v0.2.0 (CLI 0.2.0 + mod 0.16.0), CI green on `8b18bff`.
 - **Decision (D7):** checkout on Lemon Squeezy. **Done:** buyer packaging (`npm run pack` → tarball),
   `guardian pro install|status|remove`, manual fulfilment script (`npm run fulfil`), founder setup guide

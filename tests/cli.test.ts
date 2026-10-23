@@ -10,8 +10,9 @@ test("help and unknown command", () => {
   assert.equal(guardian(process.cwd(), "nope").code, 2);
 });
 
-test("outside a repository every command fails cleanly", () => {
-  const r = guardian("/", "inspect");
+test("outside a repository every command fails cleanly", async () => {
+  const { tmpdir } = await import("node:os");
+  const r = guardian(tmpdir(), "inspect");
   assert.equal(r.code, 1);
   assert.match(r.err, /not inside a git repository/);
 });

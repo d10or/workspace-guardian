@@ -36,7 +36,7 @@ export function globMatches(pattern: string, rel: string): boolean {
 export const patternsOverlap = (a: string, b: string) => a === b || globMatches(a, b) || globMatches(b, a);
 
 export function taskFilePath(gitCommonDir: string): string {
-  const clean = gitCommonDir.replace(/\/+$/, "");
+  const clean = gitCommonDir.replace(/\\/g, "/").replace(/\/+$/, "");
   const parent = clean.endsWith("/.git") ? clean.slice(0, -"/.git".length) : clean;
   return path.join(parent, ".guardian", "tasks.json");
 }

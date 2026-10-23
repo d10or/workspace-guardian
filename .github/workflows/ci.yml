@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,13 +23,20 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: node dist/index.js --help
-      - name: shared-checkout hook regression test
+      - name: shared-checkout hook regression test (Git Bash on Windows)
+        shell: bash
         run: bash tests/hook.test.sh
 
   mod:
-    name: session-agents mod
-    runs-on: ubuntu-latest
-    # `claude plugin validate|test` run offline once the CLI is installed; proven on run 39390316230.
+    name: session-agents mod (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    # `claude plugin validate|test` run offline once the CLI is installed; proven on ubuntu (run 39390316230).
+    # Windows is allowed to fail until it has passed once.
+    continue-on-error: ${{ matrix.os == 'windows-latest' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,6 +44,7 @@ jobs:
           node-version: 24
       - run: npm install -g @anthropic-ai/claude-code
       - name: plugin.json version matches the VERSION constant in register.tsx
+        shell: bash
         run: |
           J=$(node -p "require('./plugins/session-agents/.claude-plugin/plugin.json').version")
           T=$(grep -oE "const VERSION = '[^']+'" plugins/session-agents/hooks/register.tsx | sed "s/.*'\(.*\)'/\1/")

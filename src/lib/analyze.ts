@@ -9,7 +9,7 @@ import type { Finding } from "./output.ts";
 import type { RepoContext, WorktreeView } from "./context.ts";
 import { touchedPaths } from "./context.ts";
 
-const short = (p: string) => p.replace(/^.*\//, "");
+const short = (p: string) => p.replace(/^.*[\\/]/, "");
 const wtName = (w: WorktreeView) => `${w.branch} (${short(w.path)})`;
 
 export function taskForWorktree(tasks: readonly Task[], w: WorktreeView): Task | undefined {

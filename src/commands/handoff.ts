@@ -22,10 +22,15 @@ type TestEvidence =
 function runTests(argv: string[], cwd: string): Promise<{ exitCode: number; durationMs: number; output: string }> {
   return new Promise((resolve) => {
     const start = Date.now();
-    execFile(argv[0]!, argv.slice(1), { cwd, maxBuffer: 32 * 1024 * 1024, timeout: 30 * 60 * 1000 }, (err, stdout, stderr) => {
+    // On Windows, `npm` / `npx` / `pnpm` are .cmd shims that only resolve through the shell. The command is the
+    // user's own (--run), so a shell there is their input, not untrusted data; documented in SAFETY_AUDIT.md.
+    const win = process.platform === "win32";
+    const cb = (err: any, stdout: string | Buffer, stderr: string | Buffer) => {
       const code = err && typeof (err as { code?: unknown }).code === "number" ? (err as { code: number }).code : err ? 1 : 0;
       resolve({ exitCode: code, durationMs: Date.now() - start, output: `${stdout}${stderr}` });
-    });
+    };
+    if (win) execFile(argv.join(" "), [], { cwd, maxBuffer: 32 * 1024 * 1024, timeout: 30 * 60 * 1000, shell: true }, cb);
+    else execFile(argv[0]!, argv.slice(1), { cwd, maxBuffer: 32 * 1024 * 1024, timeout: 30 * 60 * 1000 }, cb);
   });
 }
 

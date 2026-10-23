@@ -29,13 +29,18 @@ export type RepoContext = {
 
 export class NotARepo extends Error {}
 
-const safeReal = (p: string) => {
+/** Canonical form for comparing paths git prints (forward slashes) with paths Node resolves (backslashes on Windows). */
+export const canon = (p: string) => {
+  let r: string;
   try {
-    return realpathSync(p);
+    r = realpathSync(p);
   } catch {
-    return path.resolve(p);
+    r = path.resolve(p);
   }
+  r = r.replace(/\\/g, "/");
+  return process.platform === "win32" ? r.toLowerCase() : r;
 };
+const safeReal = canon;
 
 export async function loadContext(cwd: string, baseOverride?: string): Promise<RepoContext> {
   if (!(await isRepo(cwd))) throw new NotARepo(`${cwd} is not inside a git repository`);
