@@ -116,8 +116,10 @@ export type UiState = {
   notify: Notify
   precheck: boolean
   sharePrompt: boolean
-  theme: 'light' | 'dark'
+  theme: 'auto' | 'light' | 'dark'
   jumpAuto: boolean
+  /** session ids whose card is expanded in the Sessions tab */
+  expanded: string[]
 }
 
 export type SelfRow = { sessionId: string; root: string; branch: string; note: string }

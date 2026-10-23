@@ -28,7 +28,7 @@
 ## State of the code (runs made 2026-10-23)
 - Free core: `npm test` 25 pass; `bash tests/hook.test.sh` ok; CI green on `8b18bff` (ubuntu, macos, mod job).
 - Pro (private repo): `npm test` 4 pass; `npm run pack` builds `release/*.tgz` (compiled JS only, no maps).
-- Mod 0.17.0: `claude plugin test` 20 pass (incl. pane render on terminal/desktop/vscode/mobile); `claude plugin validate` clean.
+- Mod 0.18.0 (pane redesign): `claude plugin test` 22 pass (incl. pane render on terminal/desktop/vscode/mobile); `claude plugin validate` clean.
 - End-to-end verified today: real tarball → `guardian pro install` → key from `npm run fulfil` → `guardian license add` → `guardian check` prints the scored merge plan on `demo/scenarios.sh risky`.
 - Usage counters: `<claude config>/guardian/usage/` (CLI `cli.json`, mod `mod-<session>.json`), merged by `guardian usage`; counts only, never paths.
 - Known gaps: Windows verified only by CI (commit 7007167, all five jobs green), not by a human on a Windows machine yet; mod Jump button macOS-only; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files; offline keys cannot be revoked instantly (revoked.json ships with releases).

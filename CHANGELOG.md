@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.18.0 (mod) — 2026-10-23 — pane redesign
+- Header on every tab: traffic light (all clear / N to check / N risks), repo and branch, session and task counts, last refresh time, version.
+- Overview leads with what needs attention; tasks and claims merged into one **Ownership** card with the live session on each branch and overlaps marked in red.
+- Theme **auto** by default: the pane inherits the host's colours instead of painting a white page; light and dark remain as explicit choices.
+- Compact session cards (two lines + More/Less); narrow panes drop card borders and stack buttons.
+- One glyph per meaning across pane, band and toasts, with a legend; the band shows task overlaps.
+- Empty states explain the feature and give the exact command.
+
 ## 0.17.2 (mod) — 2026-10-23
 - When an ownership hold is allowed by the user, the model now receives a note saying so, so it reports the held edit instead of "nothing happened" (found in the VS Code live test).
 

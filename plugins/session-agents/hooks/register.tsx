@@ -6,7 +6,7 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.17.2'
+const VERSION = '0.18.0'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
@@ -33,6 +33,8 @@ const TOOL_TASKS = 'mcp__session-agents__list_tasks'
 const MAX_HISTORY = 300
 const BEAT_MS = 5000
 const MAX_FILES = 25
+// Glyphs with one meaning each, shared by the pane, the band and the toasts.
+const G = { busy: '●', idle: '○', pin: '★', task: '◆', claim: '🔒', risk: '⚠', held: '⏸', ok: '✓' } as const
 
 const agents = atom({ plugin: 'session-agents', key: 'agents' } as const, [])
 const peers = atom({ plugin: 'session-agents', key: 'peers' } as const, [])
@@ -54,8 +56,9 @@ const DEFAULT_UI: UiState = {
   notify: { start: true, done: true, wait: true },
   precheck: true,
   sharePrompt: false,
-  theme: 'light',
+  theme: 'auto',
   jumpAuto: true,
+  expanded: [],
 }
 const uiAtom = atom({ plugin: 'session-agents', key: 'ui' } as const, DEFAULT_UI)
 
@@ -65,6 +68,7 @@ const fixUi = (u: Partial<UiState> | null | undefined): UiState => ({
   ...(u ?? {}),
   notify: { ...DEFAULT_UI.notify, ...(u?.notify ?? {}) },
   detail: u?.detail ?? [],
+  expanded: Array.isArray(u?.expanded) ? u!.expanded : [],
 })
 
 const ACTIONS_UNIX: { key: string; label: string; argv: string[]; where: 'here' | 'any' }[] = [
@@ -479,7 +483,7 @@ async function tick($: any) {
     const overlaps = rows.flatMap(r => r.overlap.map(f => `${short(r.sessionId)}:${f}`)).sort()
     const overlapKey = overlaps.join('|')
     if (overlapKey !== '' && overlapKey !== S.overlapSeen) {
-      $.ui.toast(`Parallel session edits the same file: ${overlaps[0]}`, { timeoutMs: 8000 })
+      $.ui.toast(`${G.risk} parallel session edits the same file: ${overlaps[0]}`, { timeoutMs: 8000 })
     }
     S.overlapSeen = overlapKey
 
@@ -818,7 +822,7 @@ async function syncClaims($: any, now: number) {
   await update($, claimsAtom, (old: ClaimRow[]) => (same(old, list) ? old : list))
   for (const c of list) {
     if (c.sessionId !== S.sessionId && !S.seenClaims.has(c.id) && S.claimsReady) {
-      $.ui.toast(`🔒 ${c.name} claimed ${c.paths.slice(0, 2).join(', ')}${c.paths.length > 2 ? '…' : ''} until ${hhmm(c.expiresAt)}`, { timeoutMs: 10000 })
+      $.ui.toast(`${G.claim} ${c.name} claimed ${c.paths.slice(0, 2).join(', ')}${c.paths.length > 2 ? '…' : ''} until ${hhmm(c.expiresAt)}`, { timeoutMs: 10000 })
     }
     S.seenClaims.add(c.id)
   }
@@ -935,7 +939,7 @@ async function syncTasks($: any) {
   const key = list.filter(t => t.status === 'active').map(t => `${t.id}@${t.branch}`).join('|')
   if (S.tasksSeen !== '' && key !== S.tasksSeen) {
     const added = list.filter(t => t.status === 'active' && !S.tasksSeen.includes(`${t.id}@${t.branch}`))
-    if (added.length) $.ui.toast(`📌 task ${added[0].id} now owns ${added[0].paths.slice(0, 2).join(', ')} on ${added[0].branch || 'any branch'}`, { timeoutMs: 10000 })
+    if (added.length) $.ui.toast(`${G.task} task ${added[0].id} now owns ${added[0].paths.slice(0, 2).join(', ')} on ${added[0].branch || 'any branch'}`, { timeoutMs: 10000 })
   }
   S.tasksSeen = key
 }
@@ -1266,11 +1270,19 @@ async function jumpTo($: any, p: PeerRow) {
   ])
 }
 
+async function toggleExpanded($: any, id: string) {
+  await update($, uiAtom, (raw: UiState) => {
+    const u = fixUi(raw)
+
+    return { ...u, expanded: u.expanded.includes(id) ? u.expanded.filter(x => x !== id) : [...u.expanded, id] }
+  })
+}
+
 async function toggleTheme($: any) {
   await update($, uiAtom, (raw: UiState) => {
     const u = fixUi(raw)
 
-    return { ...u, theme: u.theme === 'light' ? 'dark' : 'light' }
+    return { ...u, theme: u.theme === 'auto' ? 'light' : u.theme === 'light' ? 'dark' : 'auto' }
   })
   await savePrefs($)
 }
@@ -1453,7 +1465,7 @@ export const register: Register = on => {
             S.warned.set(key, now)
             const mins = Math.max(1, Math.round((now - clash.editAt[rel]) / 60000))
             await recordPause($, now, rel, clash, `${clash.name} edited it ${mins} min ago`)
-            $.ui.toast(`⚠ "${clash.name}" also edits ${rel}; paused to coordinate`, { timeoutMs: 8000 })
+            $.ui.toast(`${G.held} "${clash.name}" also edits ${rel}; held to coordinate`, { timeoutMs: 8000 })
 
             return {
               deny: `session-agents: the session "${clash.name}" (branch ${clash.branch}) edited ${rel} ${mins} minute${mins > 1 ? 's' : ''} ago. Send it a short message with the message_peer tool (or ask the user) before editing. If you have coordinated, or it does not matter, repeat the same edit and it will go through.`,
@@ -1473,7 +1485,7 @@ export const register: Register = on => {
           if (now - (S.warned.get(key) ?? 0) > WARN_MEMORY_MS) {
             S.warned.set(key, now)
             await recordPause($, now, rel, { sessionId: held.sessionId, name: held.name }, `claimed by ${held.name} until ${hhmm(held.expiresAt)}`)
-            $.ui.toast(`🔒 ${rel} is claimed by "${held.name}"; paused to coordinate`, { timeoutMs: 8000 })
+            $.ui.toast(`${G.held} ${rel} is claimed by "${held.name}"; held to coordinate`, { timeoutMs: 8000 })
 
             return {
               deny: `session-agents: "${held.name}" has claimed ${held.paths.join(', ')} until ${hhmm(held.expiresAt)}${held.note ? ` (${held.note})` : ''}. Send it a short message with the message_peer tool (or ask the user) before editing ${rel}. If you have coordinated, or it does not matter, repeat the same edit and it will go through.`,
@@ -1608,8 +1620,9 @@ export const register: Register = on => {
   on('tool.call', { tool: TOOL_LIST }, async $ => ({ result: peersText(await read($, peers), await read($, claimsAtom)) }))
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
-    const [info, others] = await Promise.all([read($, gitAtom), read($, peers)])
+    const [info, others, taskRows] = await Promise.all([read($, gitAtom), read($, peers), read($, tasksAtom)])
     if (e.props.hasSurvey || info === null) return next(e)
+    const overlapCount = tasksOverlap(taskRows).length
 
     const { Box, Text } = $.ui.resolve(e)
     const busy = others.filter(p => p.status === 'busy').length
@@ -1626,6 +1639,7 @@ export const register: Register = on => {
           <Text color={busy ? 'green' : 'white'}>{others.length} session{others.length === 1 ? '' : 's'}{busy ? ` (${busy} busy)` : ''}</Text>
           <Text dimColor>  │  </Text>
           <Text color="blue">{info.worktrees.length} worktree{info.worktrees.length === 1 ? '' : 's'}</Text>
+          {overlapCount ? <Text color="red">  │  {G.risk} {overlapCount} task overlap{overlapCount === 1 ? '' : 's'}</Text> : null}
           <Text dimColor>  │  /sessions</Text>
         </Text>
       </Box>
@@ -1641,74 +1655,31 @@ export const register: Register = on => {
     const ui = fixUi(rawUi)
     const now = await $.clock.now()
     const wide = e.props.bodyColumns ?? e.viewport?.columns ?? 60
-    const nameW = Math.max(16, Math.min(34, wide - 24))
+    // Narrow panes (VS Code / desktop side panels): no card borders, buttons stack.
+    const narrow = wide < 50
+    const nameW = Math.max(12, Math.min(34, wide - 24))
     const isPinned = (id: string) => pins.some(pin => pin.sessionId === id)
+    const isExpanded = (id: string) => ui.expanded.includes(id)
     const others = allPeers
       .filter(p => isPinned(p.sessionId) || ((!ui.busyOnly || p.status === 'busy') && (!ui.hideBg || p.kind !== 'bg')))
       .sort((a, b) => Number(isPinned(b.sessionId)) - Number(isPinned(a.sessionId)))
     const dot = (status: string) =>
-      status === 'busy' ? { glyph: '●', color: 'green' } : status === 'shell' ? { glyph: '●', color: 'cyan' } : { glyph: '○', color: 'gray' }
+      status === 'busy' ? { glyph: G.busy, color: 'green' } : status === 'shell' ? { glyph: G.busy, color: 'cyan' } : { glyph: G.idle, color: 'gray' }
 
-    const tone = (key: string) =>
-      key === 'att'
-        ? attention.some(a => a.color === 'red') ? 'red' : attention.length ? 'yellow' : 'green'
-        : PALETTE[key] ?? 'gray'
-    const card = (key: string, title: string, ...kids: unknown[]) => (
-      <Box key={key} flexDirection="column" borderStyle="round" borderColor={tone(key)} paddingX={1}>
-        <Text bold color={tone(key)}>{title}</Text>
-        {kids}
-      </Box>
-    )
-
-    const sessionCard = (p: PeerRow) => {
-      const d = dot(p.status)
-      return (
-        <Box key={p.sessionId} flexDirection="column" borderStyle="round" borderColor={isPinned(p.sessionId) ? 'magenta' : p.status === 'busy' ? 'green' : 'gray'} paddingX={1}>
-          <Box>
-            <Text color={d.color}>{d.glyph} </Text>
-            <Box width={nameW}><Text wrap="truncate-end" bold color={p.status === 'busy' ? 'green' : p.status === 'shell' ? 'cyan' : undefined}>{isPinned(p.sessionId) ? '★ ' : ''}{p.name}</Text></Box>
-            <Text dimColor> {p.status} · {ago(now - p.updatedAt)}</Text>
-          </Box>
-          <Text wrap="truncate-end"><Text color="cyan">⎇ {p.branch}</Text><Text dimColor>{p.kind === 'bg' ? '  · background job' : ''}{p.isSameProject ? '' : '  · other project'}</Text></Text>
-          {p.task !== '' && <Text wrap="truncate-end"><Text color="blue" bold>task </Text>{p.task}</Text>}
-          {p.activity !== '' && <Text wrap="truncate-end"><Text color="magenta" bold>last </Text><Text dimColor>{p.activity}</Text></Text>}
-          {p.overlap.length > 0 && <Text color="yellow">⚠ also editing: {p.overlap.join(', ')}</Text>}
-          {liveClaims.some(c => c.sessionId === p.sessionId) && (
-            <Text wrap="truncate-end">
-              <Text color="yellow" bold>claims </Text>
-              {liveClaims.filter(c => c.sessionId === p.sessionId).map(c => c.paths.join(', ')).join('; ')}
-            </Text>
-          )}
-          {p.subs.length > 0 && (
-            <Box flexDirection="column">
-              <Text wrap="truncate-end">
-                <Text color="magenta" bold>agents </Text>
-                <Text color={p.subs.some(sub => sub.isRunning) ? 'green' : 'gray'}>{p.subs.filter(sub => sub.isRunning).length} active</Text>
-                <Text dimColor> · {p.subs.filter(sub => !sub.isRunning).length} finished recently</Text>
-              </Text>
-              {p.subs.filter(sub => sub.isRunning).slice(0, 3).map(sub => (
-                <Text key={sub.id} dimColor wrap="truncate-end">  ● {sub.label}</Text>
-              ))}
-            </Box>
-          )}
-          <Box gap={1}>
-            <Button key={`jump-${p.sessionId}`} label="Jump" onPress={() => jumpTo($, p)} />
-            <Button key={`pin-${p.sessionId}`} label={isPinned(p.sessionId) ? 'Unpin' : 'Pin'} onPress={() => togglePin($, p.sessionId, p.name)} />
-            <Button key={`msg-${p.sessionId}`} label="Message" onPress={() => fillTell($, p.name)} />
-            <Button key={`id-${p.sessionId}`} label="Copy id" onPress={() => copyText($, p.sessionId, 'session id')} />
-            <Button key={`dir-${p.sessionId}`} label="Copy dir" onPress={() => copyText($, p.cwd, 'directory')} />
-          </Box>
-        </Box>
-      )
-    }
-
+    // --- what needs attention (computed first: it leads the Overview and colours the header) ---
     const attention: { key: string; color: string; text: string }[] = []
-    if (info?.behind) attention.push({ key: 'behind', color: 'red', text: `${info.branch} is ${info.behind} commit${info.behind > 1 ? 's' : ''} behind ${info.base || 'upstream'}` })
+    const liveClaims = claims.filter(
+      c => c.expiresAt > now && (c.sessionId === self?.sessionId || allPeers.some(p => p.sessionId === c.sessionId)),
+    )
+    const activeTasks = tasks.filter(t => t.status === 'active')
+    const overlaps = tasksOverlap(tasks)
+    for (const o of overlaps) attention.push({ key: `tov-${o.a.id}-${o.b.id}`, color: 'red', text: `${G.risk} tasks ${o.a.id} and ${o.b.id} both claim ${o.on}` })
     for (const p of allPeers) {
-      if (p.overlap.length) attention.push({ key: `ov-${p.sessionId}`, color: 'yellow', text: `${p.name} also edits ${p.overlap[0]}` })
+      if (p.overlap.length) attention.push({ key: `ov-${p.sessionId}`, color: 'yellow', text: `${G.risk} ${p.name} also edits ${p.overlap[0]}` })
     }
+    if (info?.behind) attention.push({ key: 'behind', color: 'red', text: `${info.branch} is ${info.behind} commit${info.behind > 1 ? 's' : ''} behind ${info.base || 'upstream'}` })
     for (const w of info?.worktrees ?? []) {
-      if (w.dirty) attention.push({ key: `dirty-${w.path}`, color: 'yellow', text: `${w.branch}: ${w.dirty} uncommitted file${w.dirty > 1 ? 's' : ''}` })
+      if (w.dirty && !w.isHere) attention.push({ key: `dirty-${w.path}`, color: 'yellow', text: `${w.branch}: ${w.dirty} uncommitted file${w.dirty > 1 ? 's' : ''}` })
     }
     if ((info?.merged.length ?? 0) > 0) attention.push({ key: 'merged', color: 'cyan', text: `${info?.merged.length} merged branch${(info?.merged.length ?? 0) > 1 ? 'es' : ''} can be deleted (Git tab)` })
     for (const r of (usage?.rows ?? []).filter(x => x.window > 0 && (x.ctx / x.window) * 100 >= 85)) {
@@ -1717,53 +1688,147 @@ export const register: Register = on => {
     for (const l of usage?.limits ?? []) {
       if (l.percentUsed >= 80) attention.push({ key: `lim-${l.kind}`, color: l.percentUsed >= 95 ? 'red' : 'yellow', text: `${LIMIT_LABEL[l.kind] ?? l.kind}: ${Math.round(l.percentUsed)}% used` })
     }
-    for (const o of tasksOverlap(tasks)) attention.push({ key: `tov-${o.a.id}-${o.b.id}`, color: 'yellow', text: `tasks ${o.a.id} and ${o.b.id} both claim ${o.on}` })
     const openNotes = notes.filter(n => !n.done)
     if (openNotes.length) attention.push({ key: 'notes', color: 'cyan', text: `${openNotes.length} open note${openNotes.length > 1 ? 's' : ''}: ${openNotes[0].text.slice(0, 50)}` })
     if (self?.note.startsWith('ERROR')) attention.push({ key: 'err', color: 'red', text: self.note })
+    const risks = attention.filter(a => a.color === 'red').length
+    const warns = attention.filter(a => a.color === 'yellow').length
+    const light = risks ? 'red' : warns ? 'yellow' : 'green'
 
+    const tone = (key: string) => (key === 'att' ? light : PALETTE[key] ?? 'gray')
+    const card = (key: string, title: string, ...kids: unknown[]) =>
+      narrow ? (
+        <Box key={key} flexDirection="column" paddingLeft={0}>
+          <Text bold color={tone(key)}>{title}</Text>
+          {kids}
+        </Box>
+      ) : (
+        <Box key={key} flexDirection="column" borderStyle="round" borderColor={tone(key)} paddingX={1}>
+          <Text bold color={tone(key)}>{title}</Text>
+          {kids}
+        </Box>
+      )
+    // A row of buttons that stacks on narrow panes.
+    const buttons = (key: string, ...kids: unknown[]) => (
+      <Box key={key} gap={narrow ? 0 : 1} flexDirection={narrow ? 'column' : 'row'} flexWrap="wrap">{kids}</Box>
+    )
+
+    // --- header: the same line on every tab ---
+    const repoName = (S.root || self?.root || '').replace(/\/+$/, '').split('/').pop() || '…'
     const busyCount = allPeers.filter(p => p.status === 'busy').length
-    const tabBtn = (tab: Tab, label: string) => (
-      <Button key={`tab-${tab}`} label={ui.tab === tab ? `● ${label}` : `○ ${label}`} onPress={() => setTab($, tab)} />
+    const header = (
+      <Box key="hdr" flexDirection="column">
+        <Text wrap="truncate-end">
+          <Text bold color={light}>{risks ? `${G.risk} ${risks} risk${risks === 1 ? '' : 's'}` : warns ? `${G.risk} ${warns} to check` : `${G.ok} all clear`}</Text>
+          <Text dimColor>  │  </Text>
+          <Text bold>{repoName}</Text>
+          <Text color="cyan"> ⎇ {info?.branch ?? self?.branch ?? '…'}</Text>
+          {info?.dirty ? <Text color="yellow"> ±{info.dirty}</Text> : null}
+          {info?.ahead ? <Text color="green"> ↑{info.ahead}</Text> : null}
+          {info?.behind ? <Text color="red"> ↓{info.behind}</Text> : null}
+          <Text dimColor>  │  </Text>
+          <Text color={busyCount ? 'green' : undefined}>{allPeers.length + 1} session{allPeers.length ? 's' : ''}{busyCount ? ` (${busyCount} busy)` : ''}</Text>
+          <Text dimColor>  ·  {activeTasks.length} task{activeTasks.length === 1 ? '' : 's'}</Text>
+        </Text>
+        <Text dimColor wrap="truncate-end">updated {new Date(now).toTimeString().slice(0, 8)} · every {BEAT_MS / 1000}s · v{VERSION}{self ? ` · ${short(self.sessionId)}` : ''}</Text>
+      </Box>
     )
 
-    const liveClaims = claims.filter(
-      c => c.expiresAt > now && (c.sessionId === self?.sessionId || allPeers.some(p => p.sessionId === c.sessionId)),
-    )
-    const claimsCard = card('claim', `Claims  ${liveClaims.length}`,
-      liveClaims.length === 0 && <Text key="none" dimColor>none. /claim {'<paths>'} [note], or sessions can use claim_files</Text>,
+    // --- Ownership: tasks and claims as one map, overlaps marked ---
+    const overlapIds = new Set(overlaps.flatMap(o => [o.a.id, o.b.id]))
+    const sessionOnBranch = (branch: string) => (branch === '' ? undefined : branch === info?.branch ? 'you' : allPeers.find(p => p.branch === branch)?.name)
+    const ownershipCard = card('task', `Ownership  ${activeTasks.length} task${activeTasks.length === 1 ? '' : 's'} · ${liveClaims.length} claim${liveClaims.length === 1 ? '' : 's'}`,
+      activeTasks.length === 0 && liveClaims.length === 0 && (
+        <Box key="none" flexDirection="column">
+          <Text dimColor wrap="wrap">Declare which paths each piece of work owns. Another session editing them from a different branch is held and you are asked first.</Text>
+          <Text dimColor wrap="wrap">  /task add AUTH 'src/auth/**' --branch feature/auth</Text>
+          <Text dimColor wrap="wrap">  /claim src/db  (short-lived, this session only)</Text>
+        </Box>
+      ),
+      activeTasks.map(t => {
+        const who = sessionOnBranch(t.branch)
+        const hot = overlapIds.has(t.id)
+        return (
+          <Box key={t.id} flexDirection="column">
+            <Text wrap="truncate-end">
+              <Text bold color={hot ? 'red' : who === 'you' ? 'cyan' : 'magenta'}>{hot ? G.risk : G.task} {t.id}</Text>
+              <Text dimColor>  {t.branch || 'any branch'}</Text>
+              {who ? <Text color={who === 'you' ? 'cyan' : 'green'}>  {G.busy} {who}</Text> : t.branch ? <Text dimColor>  no session on it</Text> : null}
+            </Text>
+            <Text wrap="truncate-end" color={hot ? 'red' : undefined}>    {t.paths.join(', ')}{hot ? `  ← overlaps ${overlaps.filter(o => o.a.id === t.id || o.b.id === t.id).map(o => (o.a.id === t.id ? o.b.id : o.a.id)).join(', ')}` : ''}</Text>
+            {t.note !== '' && <Text dimColor wrap="truncate-end">    {t.note}</Text>}
+            {buttons(`tb-${t.id}`, <Button key={`done-${t.id}`} label="Done" onPress={() => finishTask($, t.id)} />)}
+          </Box>
+        )
+      }),
       liveClaims.map(c => {
         const isMine = c.sessionId === self?.sessionId
         return (
           <Box key={c.id} flexDirection="column">
             <Text wrap="truncate-end">
-              <Text bold color={isMine ? 'cyan' : 'yellow'}>{isMine ? 'you' : c.name}</Text>
+              <Text bold color={isMine ? 'cyan' : 'yellow'}>{G.claim} {isMine ? 'you' : c.name}</Text>
               <Text dimColor>  until {hhmm(c.expiresAt)}</Text>
             </Text>
-            <Text wrap="truncate-end">  {c.paths.join(', ')}</Text>
-            {c.note !== '' && <Text dimColor wrap="truncate-end">  {c.note}</Text>}
-            {isMine && <Box paddingLeft={2}><Button key={`rel-${c.id}`} label="Release" onPress={() => releaseClaims($, c.paths)} /></Box>}
+            <Text wrap="truncate-end">    {c.paths.join(', ')}{c.note ? <Text dimColor>  {c.note}</Text> : null}</Text>
+            {isMine && buttons(`cb-${c.id}`, <Button key={`rel-${c.id}`} label="Release" onPress={() => releaseClaims($, c.paths)} />)}
           </Box>
         )
       }))
 
-    const activeTasks = tasks.filter(t => t.status === 'active')
-    const tasksCard = card('task', `Tasks  ${activeTasks.length}`,
-      activeTasks.length === 0 && <Text key="none" dimColor>none. /task add {'<ID> <paths>'} [--branch {'<name>'}] [note]</Text>,
-      activeTasks.map(t => {
-        const mine = t.branch !== '' && t.branch === info?.branch
-        return (
-          <Box key={t.id} flexDirection="column">
-            <Text wrap="truncate-end">
-              <Text bold color={mine ? 'cyan' : 'magenta'}>{t.id}</Text>
-              <Text dimColor>  {t.branch || 'any branch'}{mine ? ' (this branch)' : ''}{t.owner ? ` · ${t.owner}` : ''}</Text>
-            </Text>
-            <Text wrap="truncate-end">  {t.paths.join(', ')}</Text>
-            {t.note !== '' && <Text dimColor wrap="truncate-end">  {t.note}</Text>}
-            <Box paddingLeft={2}><Button key={`done-${t.id}`} label="Done" onPress={() => finishTask($, t.id)} /></Box>
+    // --- compact session cards: two lines, More for the rest ---
+    const sessionCard = (p: PeerRow) => {
+      const d = dot(p.status)
+      const open = isExpanded(p.sessionId)
+      const mine = liveClaims.filter(c => c.sessionId === p.sessionId)
+      const body = (
+        <Box key={p.sessionId} flexDirection="column">
+          <Box>
+            <Text color={d.color}>{d.glyph} </Text>
+            <Box width={nameW}><Text wrap="truncate-end" bold color={p.status === 'busy' ? 'green' : p.status === 'shell' ? 'cyan' : undefined}>{isPinned(p.sessionId) ? `${G.pin} ` : ''}{p.name}</Text></Box>
+            <Text dimColor> {p.status} · {ago(now - p.updatedAt)}</Text>
           </Box>
-        )
-      }))
+          <Text wrap="truncate-end">
+            <Text color="cyan">⎇ {p.branch}</Text>
+            <Text dimColor>{p.kind === 'bg' ? '  · background' : ''}{p.isSameProject ? '' : '  · other project'}</Text>
+            {(p.activity || p.task) !== '' && <Text dimColor>  · {p.activity || p.task}</Text>}
+          </Text>
+          {p.overlap.length > 0 && <Text color="yellow">{G.risk} also editing: {p.overlap.join(', ')}</Text>}
+          {open && p.task !== '' && <Text wrap="truncate-end"><Text color="blue" bold>task </Text>{p.task}</Text>}
+          {open && p.activity !== '' && <Text wrap="truncate-end"><Text color="magenta" bold>last </Text><Text dimColor>{p.activity}</Text></Text>}
+          {open && mine.length > 0 && <Text wrap="truncate-end"><Text color="yellow" bold>{G.claim} </Text>{mine.map(c => c.paths.join(', ')).join('; ')}</Text>}
+          {open && p.subs.length > 0 && (
+            <Box flexDirection="column">
+              <Text wrap="truncate-end">
+                <Text color="magenta" bold>agents </Text>
+                <Text color={p.subs.some(sub => sub.isRunning) ? 'green' : 'gray'}>{p.subs.filter(sub => sub.isRunning).length} active</Text>
+                <Text dimColor> · {p.subs.filter(sub => !sub.isRunning).length} finished recently</Text>
+              </Text>
+              {p.subs.filter(sub => sub.isRunning).slice(0, 3).map(sub => (
+                <Text key={sub.id} dimColor wrap="truncate-end">  {G.busy} {sub.label}</Text>
+              ))}
+            </Box>
+          )}
+          {open
+            ? buttons(`sb-${p.sessionId}`,
+                <Button key={`jump-${p.sessionId}`} label="Jump" onPress={() => jumpTo($, p)} />,
+                <Button key={`pin-${p.sessionId}`} label={isPinned(p.sessionId) ? 'Unpin' : 'Pin'} onPress={() => togglePin($, p.sessionId, p.name)} />,
+                <Button key={`msg-${p.sessionId}`} label="Message" onPress={() => fillTell($, p.name)} />,
+                <Button key={`id-${p.sessionId}`} label="Copy id" onPress={() => copyText($, p.sessionId, 'session id')} />,
+                <Button key={`dir-${p.sessionId}`} label="Copy dir" onPress={() => copyText($, p.cwd, 'directory')} />,
+                <Button key={`less-${p.sessionId}`} label="Less" onPress={() => toggleExpanded($, p.sessionId)} />)
+            : buttons(`sb-${p.sessionId}`,
+                <Button key={`jump-${p.sessionId}`} label="Jump" onPress={() => jumpTo($, p)} />,
+                <Button key={`more-${p.sessionId}`} label="More" onPress={() => toggleExpanded($, p.sessionId)} />)}
+        </Box>
+      )
+      return narrow ? body : (
+        <Box key={p.sessionId} flexDirection="column" borderStyle="round" borderColor={isPinned(p.sessionId) ? 'magenta' : p.status === 'busy' ? 'green' : 'gray'} paddingX={1}>{body}</Box>
+      )
+    }
+
+    const tabBtn = (tab: Tab, label: string) => (
+      <Button key={`tab-${tab}`} label={ui.tab === tab ? `${G.busy} ${label}` : `${G.idle} ${label}`} onPress={() => setTab($, tab)} />
+    )
 
     const peerAgents = allPeers.flatMap(peer => peer.subs.filter(sub => sub.isRunning).map(sub => ({ peer, sub })))
 
@@ -1775,36 +1840,28 @@ export const register: Register = on => {
           <Box key={pin.sessionId} flexDirection="column">
             <Box gap={1}>
               <Text color={live ? d.color : 'gray'}>{live ? d.glyph : '✕'}</Text>
-              <Box width={nameW}><Text wrap="truncate-end" bold color={live ? 'magenta' : 'gray'}>{pin.name}</Text></Box>
+              <Box width={nameW}><Text wrap="truncate-end" bold color={live ? 'magenta' : 'gray'}>{G.pin} {pin.name}</Text></Box>
               <Text dimColor>{live ? `${live.status} · ${ago(now - live.updatedAt)}` : 'offline'}</Text>
-              {live && <Button key={`pj-${pin.sessionId}`} label="Jump" onPress={() => jumpTo($, live)} />}
-              <Button key={`unpin-${pin.sessionId}`} label="Unpin" onPress={() => togglePin($, pin.sessionId, pin.name)} />
             </Box>
             {live && (live.activity || live.task) !== '' && <Text dimColor wrap="truncate-end">  {live.activity || live.task}</Text>}
+            {buttons(`pb-${pin.sessionId}`,
+              live ? <Button key={`pj-${pin.sessionId}`} label="Jump" onPress={() => jumpTo($, live)} /> : null,
+              <Button key={`unpin-${pin.sessionId}`} label="Unpin" onPress={() => togglePin($, pin.sessionId, pin.name)} />)}
           </Box>
         )
       }))
 
     const overview = [
-      pinnedCard,
-      tasksCard,
-      claimsCard,
-      card('me', 'This session',
-        <Text key="me1">
-          ⎇ <Text bold>{info?.branch ?? self?.branch ?? '…'}</Text>
-          {info?.dirty ? <Text color="yellow">  ±{info.dirty} dirty</Text> : <Text color="green">  clean</Text>}
-          {info?.behind ? <Text color="red">  ↓{info.behind}</Text> : null}
-          {info?.ahead ? <Text color="green">  ↑{info.ahead}</Text> : null}
-        </Text>,
-        <Text key="me2" dimColor>{allPeers.length} other sessions · {busyCount} busy · {list.length} subagents · {info?.worktrees.length ?? 0} worktrees</Text>),
-      card('att', `Needs attention  ${attention.length}`,
-        attention.length === 0 && <Text key="ok" color="green">all quiet</Text>,
+      card('att', attention.length === 0 ? `${G.ok} Nothing needs attention` : `${G.risk} Needs attention  ${attention.length}`,
+        attention.length === 0 && <Text key="ok" color="green" wrap="wrap">no overlaps, no stale branches, nothing waiting. Declared tasks and live claims are checked on every edit.</Text>,
         attention.map(a => <Text key={a.key} color={a.color} wrap="truncate-end">• {a.text}</Text>)),
+      ownershipCard,
+      pinnedCard,
       card('busy', `Working now  ${busyCount}`,
-        busyCount === 0 && <Text key="none" dimColor>nothing busy</Text>,
+        busyCount === 0 && <Text key="none" dimColor>no other session is busy. Sessions tab lists every live session on this machine.</Text>,
         allPeers.filter(p => p.status === 'busy').map(p => (
           <Box key={p.sessionId} flexDirection="column">
-            <Text bold color="green" wrap="truncate-end">● {p.name}</Text>
+            <Text bold color="green" wrap="truncate-end">{G.busy} {p.name}  <Text color="cyan">⎇ {p.branch}</Text></Text>
             <Text dimColor wrap="truncate-end">  {p.activity || p.task || '…'}</Text>
           </Box>
         ))),
@@ -1821,20 +1878,21 @@ export const register: Register = on => {
             <Text bold color="green">active</Text>  {pa.sub.label}  <Text dimColor>· {pa.peer.name}</Text>
           </Text>
         ))),
+      <Text key="legend" dimColor wrap="wrap">{G.busy} busy  {G.idle} idle  {G.pin} pinned  {G.task} task  {G.claim} claim  {G.risk} risk  {G.held} held  {G.ok} clear</Text>,
     ]
 
     const activeFilters = [ui.busyOnly ? 'busy only' : '', ui.hideBg ? 'background jobs hidden' : ''].filter(Boolean)
     const sessions = [
-      <Box key="flt" gap={1}>
-        <Button key="busy" label={ui.busyOnly ? '✓ Busy only' : 'Busy only'} onPress={() => toggle($, 'busyOnly')} />
-        <Button key="bg" label={ui.hideBg ? '✓ Hide jobs' : 'Hide jobs'} onPress={() => toggle($, 'hideBg')} />
-      </Box>,
+      buttons('flt',
+        <Button key="busy" label={ui.busyOnly ? '✓ Busy only' : 'Busy only'} onPress={() => toggle($, 'busyOnly')} />,
+        <Button key="bg" label={ui.hideBg ? '✓ Hide jobs' : 'Hide jobs'} onPress={() => toggle($, 'hideBg')} />),
       activeFilters.length > 0 && (
         <Text key="fnote" color="yellow">
           filtered ({activeFilters.join(', ')}): showing {others.length} of {allPeers.length}. Pinned sessions always show.
         </Text>
       ),
-      others.length === 0 && <Text key="none" dimColor>no sessions match</Text>,
+      allPeers.length === 0 && <Text key="none" dimColor wrap="wrap">No other Claude Code session is running on this machine. Start one in another terminal or worktree and it appears here within {BEAT_MS / 1000}s, with its branch and what it is editing.</Text>,
+      allPeers.length > 0 && others.length === 0 && <Text key="nomatch" dimColor>no sessions match the filters</Text>,
       others.map(sessionCard),
     ]
 
@@ -1848,10 +1906,9 @@ export const register: Register = on => {
               <Text color={w.dirty ? 'yellow' : 'green'}> {w.dirty ? `±${w.dirty}` : 'clean'}</Text>
             </Box>
             <Text dimColor wrap="truncate-start">   {home(w.path)}</Text>
-            <Box gap={1} paddingLeft={2}>
-              <Button key={`cd-${w.path}`} label="cd" onPress={() => copyText($, `cd ${w.path}`, 'cd command')} />
-              <Button key={`st-${w.path}`} label="status" onPress={() => showStatus($, w.path)} />
-            </Box>
+            {buttons(`wb-${w.path}`,
+              <Button key={`cd-${w.path}`} label="cd" onPress={() => copyText($, `cd ${w.path}`, 'cd command')} />,
+              <Button key={`st-${w.path}`} label="status" onPress={() => showStatus($, w.path)} />)}
           </Box>
         ))),
       card('mg', `Merged into main  ${info?.merged.length ?? 0}`,
@@ -1897,23 +1954,21 @@ export const register: Register = on => {
               {ev.activity !== '' && <Text color="magenta" dimColor wrap="truncate-end">  ↳ {ev.activity}</Text>}
             </Box>
           )))),
-      history.length === 0 && <Text key="hnone" dimColor>No finished sessions recorded yet. They appear when a busy session goes idle.</Text>,
-      <Box key="hbar" gap={1}><Button key="hclr" label="Clear history" onPress={() => clearHistory($)} /></Box>,
+      history.length === 0 && <Text key="hnone" dimColor wrap="wrap">Nothing finished yet. When a busy session goes idle it is recorded here with how long it ran and what it was doing, so you can see what each session got done today.</Text>,
+      buttons('hbar', <Button key="hclr" label="Clear history" onPress={() => clearHistory($)} />),
     ]
 
     const recentMsgs = [...msgs].reverse().slice(0, Math.max(8, Math.floor(((e.viewport?.rows ?? 30) - 8) / 3)))
     const messagesTab = [
-      <Box key="mbar" gap={1}>
-        <Button key="mclr" label="Clear messages" onPress={() => clearMsgs($)} />
-      </Box>,
-      msgs.length === 0 && <Text key="mnone" dimColor>No messages yet. Use /tell {'<name>'} {'<text>'}, or sessions can use the message_peer tool.</Text>,
+      buttons('mbar', <Button key="mclr" label="Clear messages" onPress={() => clearMsgs($)} />),
+      msgs.length === 0 && <Text key="mnone" dimColor wrap="wrap">No messages yet. Sessions can send each other one line to coordinate on a file: /tell {'<name>'} {'<text>'} from the prompt, or the message_peer tool from Claude. Every held edit ({G.held}) is also logged here with the answer.</Text>,
       ...recentMsgs.map(msg => {
         if (msg.via === 'pause') {
           return (
-            <Box key={msg.id} flexDirection="column" borderStyle="round" borderColor="yellow" paddingX={1}>
+            <Box key={msg.id} flexDirection="column" borderStyle={narrow ? undefined : 'round'} borderColor="yellow" paddingX={narrow ? 0 : 1}>
               <Text wrap="truncate-end">
                 <Text dimColor>{clock(msg.at)} </Text>
-                <Text bold color="yellow">⏸ paused</Text>
+                <Text bold color="yellow">{G.held} held</Text>
                 <Text dimColor>  {msg.fromName} · coordinating with {msg.toName}</Text>
               </Text>
               <Text wrap="wrap">{msg.text}</Text>
@@ -1923,14 +1978,14 @@ export const register: Register = on => {
         const isMine = self !== null && msg.fromId === self.sessionId
         const other = isMine ? msg.toName : msg.fromName
         return (
-          <Box key={msg.id} flexDirection="column" borderStyle="round" borderColor={isMine ? 'cyan' : 'green'} paddingX={1}>
+          <Box key={msg.id} flexDirection="column" borderStyle={narrow ? undefined : 'round'} borderColor={isMine ? 'cyan' : 'green'} paddingX={narrow ? 0 : 1}>
             <Text wrap="truncate-end">
               <Text dimColor>{clock(msg.at)} </Text>
               <Text bold color={isMine ? 'cyan' : 'green'}>{isMine ? '→ ' : '← '}{other}</Text>
               <Text dimColor>  hop {msg.hop}/{MAX_HOPS} · {msg.via}{msg.delivered ? '' : ' · NOT delivered'}</Text>
             </Text>
             <Text wrap="wrap">{msg.text}</Text>
-            {!isMine && <Box gap={1}><Button key={`rp-${msg.id}`} label="Reply" onPress={() => fillTell($, msg.fromName)} /></Box>}
+            {!isMine && buttons(`rb-${msg.id}`, <Button key={`rp-${msg.id}`} label="Reply" onPress={() => fillTell($, msg.fromName)} />)}
           </Box>
         )
       }),
@@ -1946,7 +2001,7 @@ export const register: Register = on => {
                   <Text bold>{LIMIT_LABEL[l.kind] ?? l.kind}</Text>
                   <Text dimColor>  resets in {l.resetsAt ? untilReset(l.resetsAt, now) : '?'}</Text>
                 </Text>
-                <Text color={level(l.percentUsed)}>{bar(l.percentUsed)} {Math.round(l.percentUsed)}% used · {Math.max(0, 100 - Math.round(l.percentUsed))}% left</Text>
+                <Text color={level(l.percentUsed)}>{bar(l.percentUsed, narrow ? 10 : 20)} {Math.round(l.percentUsed)}% used · {Math.max(0, 100 - Math.round(l.percentUsed))}% left</Text>
               </Box>
             ))),
       card('ctx', `Context windows  ${usage?.rows.length ?? 0}`,
@@ -1959,7 +2014,7 @@ export const register: Register = on => {
                 <Text bold color={r.isSelf ? 'cyan' : undefined}>{r.isSelf ? 'this session' : r.name}</Text>
                 <Text dimColor>  {r.model.replace(/^claude-/, '')}{r.isSelf && r.costUsd > 0 ? `  · $${r.costUsd.toFixed(2)}` : ''}</Text>
               </Text>
-              <Text color={level(pct)}>{bar(pct, 16)} {fmtTok(r.ctx)} / {fmtTok(r.window)}{r.isEstimate ? '~' : ''}  {Math.round(pct)}%  <Text dimColor>· {fmtTok(Math.max(0, r.window - r.ctx))} left</Text></Text>
+              <Text color={level(pct)}>{bar(pct, narrow ? 10 : 16)} {fmtTok(r.ctx)} / {fmtTok(r.window)}{r.isEstimate ? '~' : ''}  {Math.round(pct)}%  <Text dimColor>· {fmtTok(Math.max(0, r.window - r.ctx))} left</Text></Text>
             </Box>
           )
         })),
@@ -1970,10 +2025,11 @@ export const register: Register = on => {
             <Text dimColor>  out {fmtTok(r.output)} · in {fmtTok(r.input)} · cache write {fmtTok(r.cacheCreate)} · cache read {fmtTok(r.cacheRead)} · {r.turns} turns</Text>
           </Text>
         ))),
-      S.pyFailed && <Text key="pyf" color="yellow">python3 was not found, so token totals for other sessions are unavailable. Plan limits and this session's context still work.</Text>,
+      S.pyFailed && <Text key="pyf" color="yellow">python was not found, so token totals for other sessions are unavailable. Plan limits and this session's context still work.</Text>,
       <Text key="uhint" dimColor>~ = window size estimated for other sessions. Totals count what each transcript recorded. Warnings pop up at 80% and 95%.</Text>,
     ]
 
+    const themeLabel = ui.theme === 'auto' ? 'Pane theme: auto (follows the host)' : ui.theme === 'light' ? 'Pane theme: light page' : 'Pane theme: dark'
     const actionsTab = [
       card('flt', 'Run (read-only)',
         <Box key="arow" flexWrap="wrap" gap={1}>
@@ -1982,36 +2038,31 @@ export const register: Register = on => {
           ))}
         </Box>),
       card('me', 'Copy',
-        <Box key="crow" gap={1}>
-          <Button key="cp-branch" label="Branch name" onPress={() => copyGit($, 'branch')} />
-          <Button key="cp-commit" label="Commit hash" onPress={() => copyGit($, 'commit')} />
-          <Button key="cp-root" label="Repo path" onPress={() => copyGit($, 'root')} />
-        </Box>),
+        buttons('crow',
+          <Button key="cp-branch" label="Branch name" onPress={() => copyGit($, 'branch')} />,
+          <Button key="cp-commit" label="Commit hash" onPress={() => copyGit($, 'commit')} />,
+          <Button key="cp-root" label="Repo path" onPress={() => copyGit($, 'root')} />)),
       card('me', 'Appearance',
-        <Box key="trow" gap={1}>
-          <Button key="theme" label={ui.theme === 'light' ? 'Pane theme: light (switch to dark)' : 'Pane theme: dark (switch to light)'} onPress={() => toggleTheme($)} />
-          {S.isMac && <Button key="jumpauto" label={ui.jumpAuto ? '✓ Jump switches terminal tabs' : 'Jump switches terminal tabs'} onPress={() => toggleJump($)} />}
-        </Box>),
+        buttons('trow',
+          <Button key="theme" label={`${themeLabel} — next`} onPress={() => toggleTheme($)} />,
+          S.isMac ? <Button key="jumpauto" label={ui.jumpAuto ? '✓ Jump switches terminal tabs' : 'Jump switches terminal tabs'} onPress={() => toggleJump($)} /> : null)),
       card('flt', 'Parallel-session safety',
-        <Box key="prow" gap={1}>
-          <Button key="pc" label={ui.precheck ? '✓ pause on files another session just edited' : 'pause on files another session just edited'} onPress={() => togglePrecheck($)} />
-          <Button key="sp" label={ui.sharePrompt ? '✓ share my prompt text with other sessions' : 'share my prompt text with other sessions'} onPress={() => toggleSharePrompt($)} />
-        </Box>),
+        buttons('prow',
+          <Button key="pc" label={ui.precheck ? '✓ pause on files another session just edited' : 'pause on files another session just edited'} onPress={() => togglePrecheck($)} />,
+          <Button key="sp" label={ui.sharePrompt ? '✓ share my prompt text with other sessions' : 'share my prompt text with other sessions'} onPress={() => toggleSharePrompt($)} />)),
       card('sub', 'Notify me when a session…',
-        <Box key="nrow" gap={1}>
-          <Button key="nt-start" label={ui.notify.start ? '✓ starts working' : 'starts working'} onPress={() => toggleNotify($, 'start')} />
-          <Button key="nt-done" label={ui.notify.done ? '✓ finishes / goes idle' : 'finishes / goes idle'} onPress={() => toggleNotify($, 'done')} />
-          <Button key="nt-wait" label={ui.notify.wait ? '✓ needs me' : 'needs me'} onPress={() => toggleNotify($, 'wait')} />
-        </Box>),
+        buttons('nrow',
+          <Button key="nt-start" label={ui.notify.start ? '✓ starts working' : 'starts working'} onPress={() => toggleNotify($, 'start')} />,
+          <Button key="nt-done" label={ui.notify.done ? '✓ finishes / goes idle' : 'finishes / goes idle'} onPress={() => toggleNotify($, 'done')} />,
+          <Button key="nt-wait" label={ui.notify.wait ? '✓ needs me' : 'needs me'} onPress={() => toggleNotify($, 'wait')} />)),
     ]
 
     const notesTab = [
-      <Box key="nbar" gap={1}>
-        <Button key="nsave" label="Save prompt as note" onPress={() => noteFromPrompt($)} />
-        <Button key="nclr" label="Clear done" onPress={() => clearDone($)} />
-      </Box>,
+      buttons('nbar',
+        <Button key="nsave" label="Save prompt as note" onPress={() => noteFromPrompt($)} />,
+        <Button key="nclr" label="Clear done" onPress={() => clearDone($)} />),
       card('open', `Open  ${openNotes.length}`,
-        openNotes.length === 0 && <Text key="none" dimColor>nothing open. /note &lt;text&gt; or type in the prompt and Save</Text>,
+        openNotes.length === 0 && <Text key="none" dimColor wrap="wrap">A small to-do list shared by all your sessions. /note {'<text>'}, or type in the prompt and press "Save prompt as note".</Text>,
         openNotes.map(n => (
           <Box key={n.id} gap={1}>
             <Box width={Math.max(14, wide - 20)}><Text wrap="wrap"><Text color="yellow" bold>☐ </Text>{n.text}</Text></Box>
@@ -2030,6 +2081,7 @@ export const register: Register = on => {
 
     const tree = (
       <Box flexDirection="column" gap={1}>
+        {header}
         {/* wraps on narrow panes (desktop / VS Code side panels) so no tab is cut off */}
         <Box gap={1} flexWrap="wrap">
           {tabBtn('overview', 'Overview')}
@@ -2052,7 +2104,7 @@ export const register: Register = on => {
         {ui.tab === 'messages' && messagesTab}
 
         {ui.flash !== '' && (
-          <Box flexDirection="column" borderStyle="round" borderColor="yellow" paddingX={1}>
+          <Box flexDirection="column" borderStyle={narrow ? undefined : 'round'} borderColor="yellow" paddingX={narrow ? 0 : 1}>
             <Text color="yellow">{ui.flash}</Text>
             {ui.detail.map((line, i) => (
               <Text key={`d${i}`} dimColor wrap="truncate-end">{line}</Text>
@@ -2060,14 +2112,14 @@ export const register: Register = on => {
           </Box>
         )}
 
-        <Box gap={1}>
-          <Button key="refresh" label="Refresh" onPress={() => tick($)} />
-          <Button key="fetch" label="Fetch origin" onPress={() => doFetch($)} />
-        </Box>
-        <Text dimColor>session-agents v{VERSION}  ·  {self ? short(self.sessionId) : '…'}</Text>
+        {buttons('foot',
+          <Button key="refresh" label="Refresh" onPress={() => tick($)} />,
+          <Button key="fetch" label="Fetch origin" onPress={() => doFetch($)} />)}
       </Box>
     )
 
+    // auto: inherit the host's colours (terminal theme, VS Code, desktop); light / dark repaint explicitly.
+    if (ui.theme === 'auto') return tree
     const pal = ui.theme === 'light' ? LIGHT : DARK
     const painted = paint(tree, pal)
     if (ui.theme !== 'light' || painted === null || typeof painted !== 'object') return painted

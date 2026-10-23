@@ -12,7 +12,7 @@ Open it with `/sessions` (also `/agents`). The pane has tabs:
 
 | Tab | What it shows |
 | --- | --- |
-| **Overview** | Pinned sessions, active file claims, a "Needs attention" list, what is working right now, subagents |
+| **Overview** | What needs attention first (overlaps, stale branches, limits), then **Ownership** (tasks and claims as one map, overlaps in red), pinned sessions, what is working now, subagents, and a glyph legend |
 | **Sessions** | One card per live session: status, branch, current task, last action, subagents, claims. Buttons: Jump, Pin, Message, Copy |
 | **Git** | Worktrees (dirty or clean), branches already merged into the default branch |
 | **History** | Sessions that finished, grouped by day, with how long they ran |
@@ -23,7 +23,10 @@ Open it with `/sessions` (also `/agents`). The pane has tabs:
 
 Also:
 
-- A one-line band above the prompt: branch, dirty files, ahead/behind, number of sessions.
+- A header on every tab: traffic light (all clear / to check / risks), repo and branch, sessions and tasks, last refresh, version.
+- A one-line band above the prompt: branch, dirty files, ahead/behind, number of sessions, and task overlaps when any exist.
+- Theme follows the host by default (terminal, VS Code, desktop); light and dark are explicit choices in Actions.
+- Session cards are two lines by default; **More** shows agents, claims and all buttons. Narrow side panels drop borders and stack buttons.
 - Toasts when another session starts working, finishes, or needs you. Pinned sessions always notify.
 - Warnings when a session's context passes 80% / 95%, or a plan window passes 80% / 95%.
 
@@ -127,7 +130,7 @@ If another session on the same project edited a file in the last 10 minutes, or 
 
 ## Settings
 
-In the **Actions** tab: pane theme (light page by default, readable on any terminal theme), notification kinds, the edit pause, and whether Jump may switch terminal tabs. Settings are saved and shared by all sessions.
+In the **Actions** tab: pane theme (auto by default; light page or dark as explicit choices), notification kinds, the edit pause, and whether Jump may switch terminal tabs. Settings are saved and shared by all sessions.
 
 ## Known limits
 
