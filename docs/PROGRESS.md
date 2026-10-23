@@ -4,6 +4,11 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
+- **Done:** `docs/FOUNDER_RUNBOOK.md`: every founder-only step (store, directory, clip, posts, outreach)
+  with pre-filled values and what Claude does after each. Backlog G4-05 added: a sellable "Project
+  Continuity Kit" skill pack for Agensi (side line, no Pro content). Checkpoint rewritten as the
+  hand-off point: engineering complete, waiting on founder actions.
+
 - **Decision (D9):** Lemon Squeezy confirmed as the only sales channel; a free skill wrapper on Agensi.io is deferred to after launch (channel 11 in RESEARCH_G1 §4).
 - **Decision (D8):** founding price $1/month for 30 days / 100 buyers, grandfathered; free core stays free.
   Pricing doc, store guide (variant F + page copy) and launch posts updated. Early pane feedback from

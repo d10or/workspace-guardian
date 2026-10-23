@@ -1,40 +1,41 @@
 # Checkpoint (living state; rewritten by /checkpoint, injected at every session start)
 
-**Updated:** 2026-10-23 (end of day) · **Current gate:** G3 private alpha; G1, G2 closed; G5 engineering complete · **Release:** v0.2.0 public at https://github.com/d10or/workspace-guardian (CLI 0.2.1, mod 0.17.0; CI green on ubuntu, macos, windows at 7007167); Pro 0.1.0 private at `d10or/workspace-guardian-pro` (615c22b)
+**Updated:** 2026-10-23 (evening) · **Current gate:** G3 private alpha; G1, G2 closed; G5 engineering complete · **Release:** v0.2.1 public at https://github.com/d10or/workspace-guardian (CLI 0.2.1, mod 0.18.0 on main, last release tag v0.2.1); Pro 0.1.0 private at `d10or/workspace-guardian-pro`
 
-## Founder actions pending (nothing here can be done from a session)
-- G3-02 alpha outreach: send the message in `docs/ALPHA_OUTREACH.md` to five people from its target list; log in the Alpha Testers sheet. 0 of 5 so far.
-- G2-09 fourth clip: record `/task add` + the Allow / Deny question inside Claude Code (the three terminal clips are in `demo/recordings/` and the README).
-- G4-03 launch: post `docs/LAUNCH_POSTS.md` (Reddit, Show HN, X, Anthropic directory at claude.ai/directory/manage).
-- G5-02 store: follow `docs/CHECKOUT_LEMONSQUEEZY.md` (create store, upload `workspace-guardian-pro/release/workspace-guardian-pro-0.1.0.tgz`, test purchase + refund). Back up `~/.config/workspace-guardian/signing-key.pem` offline.
-- Restart Claude Code once to load mod 0.16.0 (installed from GitHub, update applied 2026-10-23).
+## Where we stopped
+Engineering is done for the pilot; all five CI jobs green on `2a245fd`. The project is waiting on the
+founder's outward actions, in this order, each with pre-filled values in `docs/FOUNDER_RUNBOOK.md`:
+1. Lemon Squeezy store with the founding variant ($1/month) → send Claude the product URL + support email.
+2. Test purchase + refund; back up `~/.config/workspace-guardian/signing-key.pem` offline.
+3. Fourth demo clip (Ownership question inside Claude Code).
+4. Launch posts (Reddit → Show HN → X) and the Anthropic directory submission (`docs/LAUNCH_POSTS.md`).
+5. Five alpha outreach messages (`docs/ALPHA_OUTREACH.md`).
+Early feedback: the founder showed the pane to people and it was received well (pane only; no
+workflow completions logged; nothing in the Alpha Testers sheet yet).
 
-## In progress / blocked (engineering)
-- Nothing half-done. Working tree clean at `a1cbaa2`.
-
-## Next engineering work (in order)
-1. (closed 2026-10-23) Desktop app and VS Code live-confirmed; tab-row wrap fixed (0.17.1); allowed holds now reported to the model (0.17.2). Nothing engineering-side is open; next work is driven by alpha feedback.
-2. When the first alpha feedback arrives: triage into issues, fix the top three within the week, re-record clips if output text changed (`bash demo/record.sh`).
-3. Only if orders exceed ~5/week: Cloudflare Worker webhook signer (design in `docs/CHECKOUT_LEMONSQUEEZY.md`).
+## Claude's next actions (when the founder reports a step)
+- Store URL arrives → put it in README (Pro paragraph), `src/commands/check.ts` Pro hint, `docs/LAUNCH_POSTS.md`, `docs/PRIVACY.md` (support email); push; tag v0.2.2.
+- Orders → founder fulfils with `npm run fulfil`; Claude logs Weekly Metrics (gross / fees / refunds) and files feedback as issues.
+- Alpha replies → issues, fix top three within the week, `/gate G3` at 4 of 5 completions.
+- After launch: G4-04 free SKILL.md wrapper for Agensi.io; G4-05 "Project Continuity Kit" skill pack (checkpoint/resume/gate + hook + templates) to sell on Agensi at $9–$19, zero Pro content.
 
 ## Decisions that must not be re-litigated
+- 2026-10-17: wedge = task ownership + preflight overlap; handoff/merge-readiness fast-follow (Radar exists).
 - 2026-10-20: interviews dropped; H1 accepted on desk research + founder incidents.
-- 2026-10-17: wedge = task ownership + preflight overlap; handoff/merge-readiness are fast-follow (Radar exists).
-- 2026-10-20: public repo under PolyForm Shield 1.0.0 (source-available, noncompete), superseding MIT the same day with 0 clones recorded; all paid code in the private repo; awesome-claude-code listing dropped. Founder reconsidered "fully private" on 2026-10-20 and chose to keep this.
-- 2026-10-20: low-price volume pricing; test $9 one-time (A) vs $4/month (B) at G5.
-- 2026-10-23: sales channel is Lemon Squeezy only; Agensi.io gets a free SKILL.md wrapper after launch as a discovery experiment, never Pro.
-- 2026-10-23: founding price for Pro: $1/month for 30 days or 100 buyers, kept for life; free core stays free (no marketplace sells mods; the directory is free-only). Standard $9 / $4 A/B runs after the window.
-- 2026-10-23: checkout on Lemon Squeezy; manual key fulfilment during the pilot (`npm run fulfil -- <order> <email>` in the Pro repo); buyers run `guardian pro install <tgz>` then `guardian license add <key>`. Keys are offline Ed25519; public key embedded in `src/lib/license.ts`.
-- The mod is installed from GitHub (`d10or/workspace-guardian`), not the local folder. Git identity in both repos is the GitHub no-reply address; never the real email.
+- 2026-10-20: public repo under PolyForm Shield 1.0.0 (source-available, noncompete), superseding MIT the same day with 0 clones; paid code only in the private repo; awesome-claude-code dropped. "Fully private" reconsidered and rejected the same day.
+- 2026-10-23: checkout on Lemon Squeezy only (D7, D9); manual key fulfilment during the pilot; buyers run `guardian pro install <tgz>` then `guardian license add <key>`; keys are offline Ed25519, public key in `src/lib/license.ts`.
+- 2026-10-23: founding price $1/month for 30 days or 100 buyers, grandfathered (D8); then $9 one-time vs $4/month A/B. Free core stays free and public.
+- 2026-10-23: Agensi.io only for free/side skills (D9, G4-04, G4-05), never Pro.
+- Mod installed from GitHub (`d10or/workspace-guardian`), not the local folder. Git identity in both repos = GitHub no-reply address; never the real email.
 
 ## State of the code (runs made 2026-10-23)
-- Free core: `npm test` 25 pass; `bash tests/hook.test.sh` ok; CI green on `8b18bff` (ubuntu, macos, mod job).
-- Pro (private repo): `npm test` 4 pass; `npm run pack` builds `release/*.tgz` (compiled JS only, no maps).
-- Mod 0.18.0 (pane redesign): `claude plugin test` 22 pass (incl. pane render on terminal/desktop/vscode/mobile); `claude plugin validate` clean.
-- End-to-end verified today: real tarball → `guardian pro install` → key from `npm run fulfil` → `guardian license add` → `guardian check` prints the scored merge plan on `demo/scenarios.sh risky`.
-- Usage counters: `<claude config>/guardian/usage/` (CLI `cli.json`, mod `mod-<session>.json`), merged by `guardian usage`; counts only, never paths.
-- Known gaps: Windows verified only by CI (commit 7007167, all five jobs green), not by a human on a Windows machine yet; mod Jump button macOS-only; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files; offline keys cannot be revoked instantly (revoked.json ships with releases).
+- Free core 0.2.1: `npm test` 25 pass; hook test ok; CI green on ubuntu, macos, windows.
+- Mod 0.18.0 (pane redesign: header, risk-first overview, Ownership card, auto theme, compact cards, legend, teaching empty states, narrow layout): `claude plugin test` 22 pass; live-confirmed on terminal, desktop app and VS Code; mobile by test kit only.
+- Pro 0.1.0 (private, 615c22b): 4 tests; `npm run pack` → `release/workspace-guardian-pro-0.1.0.tgz`; `npm run fulfil` prints key + email. Verified end to end with a real signed key.
+- Usage counters under `<claude config>/guardian/usage/`; `guardian usage` merges them.
+- Known gaps: Windows verified by CI only; mod Jump button macOS-only; notes/pins/history still shared files; offline keys cannot be revoked instantly; the founder's saved pane theme is still "light" until they press the theme button once.
 
 ## Open questions for the founder
-- Jurisdiction / payout details for the Lemon Squeezy store.
-- Whether to keep the working name "Workspace Guardian" (trademark check pending).
+- Lemon Squeezy payout jurisdiction (during store setup).
+- Working name "Workspace Guardian": trademark check still pending.
+- Details of the early pane feedback (how many people, what they said) for the Interview Log.
