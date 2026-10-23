@@ -1,6 +1,6 @@
 # Checkpoint (living state; rewritten by /checkpoint, injected at every session start)
 
-**Updated:** 2026-10-23 · **Current gate:** G3 private alpha (G1, G2 closed) · **Release:** v0.1.0 public at https://github.com/d10or/workspace-guardian
+**Updated:** 2026-10-23 · **Current gate:** G3 private alpha (G1, G2 closed; G5 engineering complete) · **Release:** v0.2.0 public at https://github.com/d10or/workspace-guardian; Pro 0.1.0 private (workspace-guardian-pro@615c22b)
 
 ## In progress / blocked
 - G3-02 alpha outreach: message and targets in `docs/ALPHA_OUTREACH.md`; **founder sends**. 0 of 5 testers so far.
