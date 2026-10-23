@@ -2,7 +2,8 @@
  * The risk analysis behind `guardian check` and the "open risks" of `guardian handoff`.
  * Advisory by design: it flags risk, it never asserts a merge is safe.
  */
-import { hotspotOf } from "./hotspots.ts";
+import { HOTSPOTS, type Hotspot } from "./hotspots.ts";
+import { globMatches as gm } from "./tasks.ts";
 import { activeTasks, findViolation, globMatches, tasksOverlap, type Task } from "./tasks.ts";
 import type { Finding } from "./output.ts";
 import type { RepoContext, WorktreeView } from "./context.ts";
@@ -15,7 +16,9 @@ export function taskForWorktree(tasks: readonly Task[], w: WorktreeView): Task |
   return activeTasks(tasks).find((t) => t.branch !== "" && t.branch === w.branch);
 }
 
-export function analyze(ctx: RepoContext, knownBranches: ReadonlySet<string>): Finding[] {
+export function analyze(ctx: RepoContext, knownBranches: ReadonlySet<string>, extraHotspots: readonly Hotspot[] = []): Finding[] {
+  const hotspots = [...HOTSPOTS, ...extraHotspots];
+  const hotspotOf = (rel: string) => hotspots.find((h) => h.patterns.some((p) => gm(p, rel)));
   const out: Finding[] = [];
   const live = ctx.worktrees.filter((w) => !w.prunable && w.branch !== "(bare)");
   const active = activeTasks(ctx.tasks);

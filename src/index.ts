@@ -14,6 +14,7 @@ import { taskAdd, taskDone, taskList } from "./commands/task.ts";
 import { check } from "./commands/check.ts";
 import { handoff } from "./commands/handoff.ts";
 import { usage } from "./commands/usage.ts";
+import { license } from "./commands/license.ts";
 
 const USAGE = `guardian — coordinate parallel AI coding sessions on one repo
 
@@ -30,6 +31,8 @@ Usage:
   guardian handoff --task <ID> [--run '<test command>'] [--evidence <file>] [--out <path>] [--json]
       Markdown/JSON report: branch, commit, changed paths, test evidence or "not verified",
       open risks, next steps. Read-only unless --out is given.
+  guardian license add <key> | show | remove
+      Offline Pro key (optional). Verified locally with an embedded public key; never phones home.
   guardian usage [--json] [--reset]
       Local usage counts (no paths, nothing sent) to share voluntarily. GUARDIAN_NO_USAGE=1 disables.
 
@@ -53,6 +56,8 @@ export async function main(argv: readonly string[]): Promise<number> {
       return handoff(rest);
     case "usage":
       return usage(rest);
+    case "license":
+      return license(rest);
     case undefined:
     case "-h":
     case "--help":
@@ -60,7 +65,7 @@ export async function main(argv: readonly string[]): Promise<number> {
       process.stdout.write(USAGE);
       return 0;
     case "--version":
-      process.stdout.write("guardian 0.1.1\n");
+      process.stdout.write("guardian 0.2.0\n");
       return 0;
     default:
       process.stderr.write(`Unknown command: ${command}\n\n${USAGE}`);

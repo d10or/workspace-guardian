@@ -20,6 +20,8 @@ export type RepoContext = {
   branch: string;
   head: string;
   base: string;
+  /** The main worktree's root: where .guardian/ (tasks, policy, hotspots) lives for every worktree. */
+  mainRoot: string;
   tasksFile: string;
   tasks: Task[];
   worktrees: WorktreeView[];
@@ -59,7 +61,7 @@ export async function loadContext(cwd: string, baseOverride?: string): Promise<R
       inFlight: inFlight(gitCommon, await worktreeGitDir(w.path)),
     });
   }
-  return { cwd, root, gitCommon, branch: await branch(root), head: await headSha(root), base, tasksFile, tasks: loadTasks(tasksFile), worktrees: views };
+  return { cwd, root, gitCommon, mainRoot: path.dirname(path.dirname(tasksFile)), branch: await branch(root), head: await headSha(root), base, tasksFile, tasks: loadTasks(tasksFile), worktrees: views };
 }
 
 /** All paths a worktree touches: uncommitted (new path of a rename) plus committed since base. */

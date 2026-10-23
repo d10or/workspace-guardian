@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.0 (CLI) — 2026-10-23
+- `guardian license add|show|remove`: optional offline Pro key (Ed25519, public key embedded, never phones home).
+- `check` loads the separate Pro package when a valid key is present: scored merge plan with rebase steps, `.guardian/policy.json` policies, framework hotspot packs. Without a key nothing changes except a one-line hint.
+- Policy and hotspot files are read from the main worktree's `.guardian/`, like the task file.
+
 ## 0.1.1 (CLI) / 0.16.0 (mod) — 2026-10-23
 - `guardian usage`: local, counts-only usage summary (activation and repeat use for the pilot); `GUARDIAN_NO_USAGE=1` disables, `--reset` deletes. The mod records session starts, ownership holds and task events the same way.
 - Public repo relicensed from MIT to PolyForm Shield 1.0.0 (2026-10-20); paid features move to a private repository.

@@ -70,11 +70,18 @@ in Claude Code is what `guardian check` reports on, and vice versa.
 | `guardian task add --id AUTH --paths 'src/auth/**' --branch feature/auth [--note …] [--yes]` | Declare ownership. Previews, asks for confirmation (or `--yes`), then writes the task file atomically. Warns on declared overlaps. |
 | `guardian task done --id AUTH` / `guardian task list [--all]` | Release a task's paths / show tasks and declared overlaps. |
 | `guardian check [--json] [--strict] [--base <ref>]` | Declared overlaps, the same path changed in two worktrees, paths owned by another task, paths outside a task's claim, hotspot categories (lockfiles, migrations, schemas, generated code, routes, config) touched by several worktrees, worktrees behind base, in-flight git operations, unresolved conflicts, stale tasks. Each finding carries a fix. `--strict` exits 3 when risks exist. Advisory: it flags risk, never certifies a merge. |
+| `guardian license add <key> \| show \| remove` | Optional Pro key, verified offline with an embedded public key. Without one, everything above works unchanged. |
 | `guardian usage [--json] [--reset]` | Local counts only (which command, which day), nothing sent; paste into feedback if you want to. `GUARDIAN_NO_USAGE=1` disables. |
 | `guardian handoff --task AUTH [--run 'npm test'] [--evidence file] [--out report.md] [--json]` | Markdown or JSON: task, branch and head, ahead/behind base, commits since base, changed paths with "outside claim" marks, test evidence, open risks, next steps. Tests are **verified** only when guardian ran them itself (`--run`) and records the exit code plus a fingerprint of the tree they ran on. Supplied output is marked **supplied, not verified**. Otherwise **not verified**. |
 
 Guardian never runs checkout, rebase, merge, push, reset, or delete on your behalf. Git is called with
 argument arrays, never a shell string. JSON output carries `schemaVersion: 1`.
+
+**Pro** (separate, paid, not in this repository) adds to `check`: a scored merge plan with the exact rebase
+steps and the files to resolve, per-repo policies in `.guardian/policy.json` (which finding codes fail,
+which are ignored or downgraded), and framework hotspot packs (Next.js, Django, Rails, monorepos,
+Terraform) plus custom rules in `.guardian/hotspots.json`. The free core prints a one-line hint where Pro
+would add something, and nothing else changes.
 
 ## Development
 

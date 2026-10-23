@@ -38,6 +38,6 @@ Pass mark per plan: 3 real buyers (stretch 5), refunds excluded, no friends-and-
 
 ## What must exist before the test starts (G5-01, G5-02)
 
-1. The Pro features above implemented behind the license check, at least the merge-order planner and `--strict` policies.
+1. ~~The Pro features above implemented behind the license check~~ **Done 2026-10-23:** Pro 0.1.0 in the private repo (policies, scored merge plan with rebase steps, framework hotspot packs, custom rules); free core 0.2.0 has `guardian license add|show|remove`, offline Ed25519 verification with the embedded public key, and the loader. Signing keypair generated outside both repos (`~/.config/workspace-guardian/signing-key.pem`, mode 600); `npm run sign -- <order> <email>` in the Pro repo issues a key. Verified end to end on the demo repo with a test key.
 2. The checkout page live with message A; a test purchase made and refunded by the founder.
 3. Weekly Metrics sheet row for the week with paid conversions and refunds.

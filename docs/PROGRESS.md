@@ -2,7 +2,13 @@
 
 Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or command, never a claim.
 
-## 2026-10-23 — G6 measurement in place
+## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
+
+- **Done:** Pro 0.1.0 in the private repo `workspace-guardian-pro` (commit 400c0cb): policies, scored
+  merge plan with rebase steps, framework hotspot packs, custom rules; keygen/sign scripts; keypair
+  generated outside the repos. Free core 0.2.0: `guardian license`, offline verification, Pro loader.
+  Evidence: `tests/pro.test.ts` here (ephemeral keypair; production key must reject it), `tests/pro.test.ts`
+  there, and a real signed test key run on `demo/scenarios.sh risky` showing the scored plan.
 
 - **Done:** local usage counters (CLI + mod) and `guardian usage`, so activation and repeat use are
   measurable without telemetry. Evidence: `tests/usage.test.ts` (asserts no path or id is ever written),

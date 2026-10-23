@@ -1,6 +1,6 @@
 {
   "name": "workspace-guardian",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Preflight task-overlap checks, explicit file/task ownership, and evidence-based handoff for parallel AI coding sessions on one repository.",
   "private": true,
   "type": "module",
