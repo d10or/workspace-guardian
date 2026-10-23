@@ -79,7 +79,7 @@ To remove it: `claude plugin uninstall session-agents@session-agents`. Your save
 | Surface | Status |
 |---|---|
 | Terminal (`claude` CLI) | used daily; live-verified |
-| VS Code extension (2.1.299+) | pane validated against the VS Code element table by `hooks/surfaces.test.ts`; live check: open the repo in VS Code, start Claude Code, type `/sessions` |
+| VS Code extension (2.1.299+) | **live-confirmed 2026-10-23**: mod loaded, `list_tasks` read the shared file, two cross-branch edits were held and the user answered Allow once / Allow for the session (pause log + `hold_asked: 2`); since 0.17.2 the model is told when a held edit was allowed |
 | Desktop app, Code tab | **live-confirmed 2026-10-23** (pane, band, toasts, status line, peer discovery); tab row cut-off fixed in 0.17.1 |
 | Mobile | pane validated against the mobile element table; no live check planned for the pilot |
 | `claude -p` | hooks run, nothing is drawn (by design) |

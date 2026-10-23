@@ -4,7 +4,12 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
-- **Surfaces:** `hooks/surfaces.test.ts` mounts the pane on terminal, desktop, vscode and mobile
+- **Surfaces, live:** desktop app confirmed from the founder's screenshots (pane, band, toasts, peers);
+  found and fixed the tab row cut-off (0.17.1). VS Code confirmed by driving the VS Code session over
+  cross-session messaging: `list_tasks` read DEMO2, two edits under `docs/**` from `main` were held and
+  answered by the founder (`~/.claude/guardian/usage/mod-704a22b4….json`: `hold_asked: 2`; pause log).
+  The model in that session could not tell it had been held, so 0.17.2 adds a note to the tool result.
+- **Surfaces, kit:** `hooks/surfaces.test.ts` mounts the pane on terminal, desktop, vscode and mobile
   element tables: 4 pass. VS Code 1.143.1 + Claude Code extension 2.1.309 installed on the dev machine
   for the live check; the desktop app must be downloaded by the founder (site blocks non-browser downloads).
 

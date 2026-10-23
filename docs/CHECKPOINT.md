@@ -13,7 +13,7 @@
 - Nothing half-done. Working tree clean at `a1cbaa2`.
 
 ## Next engineering work (in order)
-1. Live-confirm the mod in VS Code (installed 2026-10-23 with the Claude Code extension; open the repo, start Claude Code, `/sessions`) and in the desktop app (founder downloads it from claude.ai/download; curl is refused). Test-kit verification of all four surfaces is done (`hooks/surfaces.test.ts`).
+1. (closed 2026-10-23) Desktop app and VS Code live-confirmed; tab-row wrap fixed (0.17.1); allowed holds now reported to the model (0.17.2). Nothing engineering-side is open; next work is driven by alpha feedback.
 2. When the first alpha feedback arrives: triage into issues, fix the top three within the week, re-record clips if output text changed (`bash demo/record.sh`).
 3. Only if orders exceed ~5/week: Cloudflare Worker webhook signer (design in `docs/CHECKOUT_LEMONSQUEEZY.md`).
 

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.17.2 (mod) — 2026-10-23
+- When an ownership hold is allowed by the user, the model now receives a note saying so, so it reports the held edit instead of "nothing happened" (found in the VS Code live test).
+
 ## 0.17.1 (mod) — 2026-10-23
 - The control-tower tab row wraps on narrow panes (desktop app and VS Code side panels); found live in the desktop app, where Messages/Usage/Actions/Notes were cut off.
 

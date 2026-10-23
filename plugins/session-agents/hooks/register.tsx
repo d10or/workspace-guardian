@@ -6,7 +6,7 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.17.1'
+const VERSION = '0.17.2'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
@@ -1420,6 +1420,7 @@ export const register: Register = on => {
 
       // Task ownership: a path owned by an active task on another branch is held while the user decides.
       const violated = findViolation(await loadTasks($), rel, S.branch, S.taskAllowed)
+      let heldNote = ''
       if (violated !== undefined) {
         const q = `Task ${violated.id} owns ${violated.paths.join(', ')} on ${violated.branch}; this session is on ${S.branch}. Allow editing ${rel}?`
         let answer = 'Deny'
@@ -1431,7 +1432,11 @@ export const register: Register = on => {
         }
         await recordPause($, now, rel, { sessionId: '', name: `task ${violated.id}` }, `owned by task ${violated.id} on ${violated.branch}: ${answer}`).catch(() => undefined)
         if (answer === 'Allow this task for the session') S.taskAllowed.add(violated.id)
-        else if (answer !== 'Allow once') {
+        if (answer === 'Allow once' || answer === 'Allow this task for the session') {
+          // Tell the model the edit crossed a task boundary and the user allowed it, so it can say so instead of
+          // reporting that nothing happened (seen in the VS Code live test).
+          heldNote = `session-agents: this edit touched ${rel}, owned by task ${violated.id} on ${violated.branch}; the user was asked and chose "${answer}". Mention this in your reply.`
+        } else {
           return { deny: `session-agents: ${rel} is owned by task ${violated.id} (${violated.paths.join(', ')}) on branch ${violated.branch}, and this session is on ${S.branch}. The user declined this edit. Work inside your own task's paths, switch to that branch, or ask the user to run /task done ${violated.id}.` }
         }
       }
@@ -1484,6 +1489,7 @@ export const register: Register = on => {
         S.editAt.set(rel, now)
         if (S.editAt.size > MAX_FILES) S.editAt.delete(S.editAt.keys().next().value as string)
       }
+      if (heldNote !== '' && ran.deny === undefined) return { ...ran, context: [...(ran.context ?? []), heldNote] }
 
       return ran
     }
