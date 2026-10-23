@@ -1,6 +1,6 @@
 # Checkpoint (living state; rewritten by /checkpoint, injected at every session start)
 
-**Updated:** 2026-10-20 · **Current gate:** G3 private alpha (G1, G2 closed) · **Release:** v0.1.0 public at https://github.com/d10or/workspace-guardian
+**Updated:** 2026-10-23 · **Current gate:** G3 private alpha (G1, G2 closed) · **Release:** v0.1.0 public at https://github.com/d10or/workspace-guardian
 
 ## In progress / blocked
 - G3-02 alpha outreach: message and targets in `docs/ALPHA_OUTREACH.md`; **founder sends**. 0 of 5 testers so far.
@@ -8,9 +8,8 @@
 - G4 launch: posts drafted in `docs/LAUNCH_POSTS.md` (Reddit, Show HN, X thread, directory submission, awesome-claude-code line, reply guide); **founder posts**. Alpha feedback issue template added.
 
 ## Next engineering work (in order)
-1. Opt-in anonymous usage counter in the mod (off by default; counts only, no paths) for G6 metrics.
-2. Pro features for G5 behind an offline license key: merge-order planner with risk score, per-repo `--strict` policies, custom hotspot rules (`docs/PRICING.md`).
-3. Verify the mod on the desktop app and VS Code surfaces.
+1. Pro features for G5 behind an offline license key: merge-order planner with risk score, per-repo `--strict` policies, custom hotspot rules (`docs/PRICING.md`).
+2. Verify the mod on the desktop app and VS Code surfaces.
 
 ## Decisions that must not be re-litigated
 - Interviews dropped; H1 accepted on desk research + founder incidents (2026-10-20).
@@ -19,7 +18,7 @@
 - The mod is installed from GitHub (`d10or/workspace-guardian`), not the local folder.
 
 ## State of the code
-- CLI v0.1.0: 19 tests green. Mod v0.15.0: 16 tests green. Hook test green. CI green on last push (`49e34a0`).
+- CLI v0.1.1: 21 tests green (2026-10-23). Mod v0.16.0: 16 tests green. Usage counters live under `<claude config>/guardian/usage/` (CLI `cli.json`, mod `mod-<session>.json`), merged by `guardian usage`. Hook test green. CI green on last push (`49e34a0`).
 - Known gaps: Windows unsupported; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files.
 
 ## Open questions for the founder

@@ -3,6 +3,7 @@ import { createInterface } from "node:readline/promises";
 import { loadContext, NotARepo } from "../lib/context.ts";
 import { activeTasks, ID_RE, normalizePath, saveTasks, tasksOverlap, type Task } from "../lib/tasks.ts";
 import { eprintln, json, parse, println, SCHEMA_VERSION, splitList } from "../lib/output.ts";
+import { record } from "../lib/usage.ts";
 
 async function confirm(question: string): Promise<boolean> {
   if (!process.stdin.isTTY) return false;
@@ -68,6 +69,7 @@ export async function taskAdd(args: readonly string[]): Promise<number> {
     }
   }
   saveTasks(ctx.tasksFile, next);
+  record("task_add");
   if (a.values.json) json({ schemaVersion: SCHEMA_VERSION, command: "task add", file: ctx.tasksFile, task, overlaps: overlaps.map((o) => ({ with: o.a.id === task.id ? o.b.id : o.a.id, on: o.on })) });
   else println(`written. ${overlaps.length ? "declared overlap recorded; 'guardian check' will keep reporting it." : "no declared overlaps."}`);
   return 0;
@@ -92,6 +94,7 @@ export async function taskDone(args: readonly string[]): Promise<number> {
   }
   const next = ctx.tasks.map((t) => (t.id === a.values.id ? { ...t, status: "done" as const } : t));
   saveTasks(ctx.tasksFile, next);
+  record("task_done");
   if (a.values.json) json({ schemaVersion: SCHEMA_VERSION, command: "task done", file: ctx.tasksFile, id: a.values.id });
   else println(`task ${a.values.id} marked done; its paths are released`);
   return 0;

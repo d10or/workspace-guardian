@@ -4,6 +4,7 @@ import { loadContext, NotARepo } from "../lib/context.ts";
 import { git } from "../lib/git.ts";
 import { activeTasks } from "../lib/tasks.ts";
 import { eprintln, json, parse, printFindings, println, SCHEMA_VERSION } from "../lib/output.ts";
+import { record } from "../lib/usage.ts";
 
 export async function localBranches(cwd: string): Promise<Set<string>> {
   const r = await git(["for-each-ref", "--format=%(refname:short)", "refs/heads"], cwd);
@@ -26,6 +27,8 @@ export async function check(args: readonly string[]): Promise<number> {
   const findings = analyze(ctx, await localBranches(ctx.root));
   const order = suggestedOrder(ctx.tasks, findings);
   const risks = findings.filter((f) => f.level === "risk").length;
+  record("check");
+  if (risks > 0) record("check_with_risks");
   if (a.values.json) {
     json({ schemaVersion: SCHEMA_VERSION, command: "check", root: ctx.root, base: ctx.base || null, worktrees: ctx.worktrees.length, tasks: activeTasks(ctx.tasks).length, findings, suggestedOrder: order, advisory: "Risk, not proof. Edits that have not happened yet are not covered." });
   } else {

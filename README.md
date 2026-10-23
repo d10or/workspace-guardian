@@ -27,7 +27,7 @@ Reproduce them with `bash demo/scenarios.sh` (see `docs/DEMO.md`).
 
 | Path | What it is |
 |---|---|
-| `plugins/session-agents/` | Working Claude Code mod v0.15.0: `/sessions` control pane, `/task` ownership shared across worktrees with an ask-the-user hold on violations, live session list, file claims, edit pause, peer messaging, git/worktree view. Docs in `docs/SESSION_AGENTS_MOD.md`. |
+| `plugins/session-agents/` | Working Claude Code mod v0.16.0: `/sessions` control pane, `/task` ownership shared across worktrees with an ask-the-user hold on violations, live session list, file claims, edit pause, peer messaging, git/worktree view. Docs in `docs/SESSION_AGENTS_MOD.md`. |
 | `.claude-plugin/marketplace.json` | Makes this repository a plugin marketplace. |
 | `LICENSE` | PolyForm Shield 1.0.0: free to use, including at work, and to modify; not permitted to use it to provide a competing product. Paid features live in a separate private repository. |
 | `scripts/git-parallel-session-check.sh` | `UserPromptSubmit` hook that warns when another session shares this checkout. |
@@ -70,6 +70,7 @@ in Claude Code is what `guardian check` reports on, and vice versa.
 | `guardian task add --id AUTH --paths 'src/auth/**' --branch feature/auth [--note …] [--yes]` | Declare ownership. Previews, asks for confirmation (or `--yes`), then writes the task file atomically. Warns on declared overlaps. |
 | `guardian task done --id AUTH` / `guardian task list [--all]` | Release a task's paths / show tasks and declared overlaps. |
 | `guardian check [--json] [--strict] [--base <ref>]` | Declared overlaps, the same path changed in two worktrees, paths owned by another task, paths outside a task's claim, hotspot categories (lockfiles, migrations, schemas, generated code, routes, config) touched by several worktrees, worktrees behind base, in-flight git operations, unresolved conflicts, stale tasks. Each finding carries a fix. `--strict` exits 3 when risks exist. Advisory: it flags risk, never certifies a merge. |
+| `guardian usage [--json] [--reset]` | Local counts only (which command, which day), nothing sent; paste into feedback if you want to. `GUARDIAN_NO_USAGE=1` disables. |
 | `guardian handoff --task AUTH [--run 'npm test'] [--evidence file] [--out report.md] [--json]` | Markdown or JSON: task, branch and head, ahead/behind base, commits since base, changed paths with "outside claim" marks, test evidence, open risks, next steps. Tests are **verified** only when guardian ran them itself (`--run`) and records the exit code plus a fingerprint of the tree they ran on. Supplied output is marked **supplied, not verified**. Otherwise **not verified**. |
 
 Guardian never runs checkout, rebase, merge, push, reset, or delete on your behalf. Git is called with

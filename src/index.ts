@@ -13,6 +13,7 @@ import { inspect } from "./commands/inspect.ts";
 import { taskAdd, taskDone, taskList } from "./commands/task.ts";
 import { check } from "./commands/check.ts";
 import { handoff } from "./commands/handoff.ts";
+import { usage } from "./commands/usage.ts";
 
 const USAGE = `guardian — coordinate parallel AI coding sessions on one repo
 
@@ -29,6 +30,8 @@ Usage:
   guardian handoff --task <ID> [--run '<test command>'] [--evidence <file>] [--out <path>] [--json]
       Markdown/JSON report: branch, commit, changed paths, test evidence or "not verified",
       open risks, next steps. Read-only unless --out is given.
+  guardian usage [--json] [--reset]
+      Local usage counts (no paths, nothing sent) to share voluntarily. GUARDIAN_NO_USAGE=1 disables.
 
 The same .guardian/tasks.json is read and written by the session-agents Claude Code mod (/task).
 `;
@@ -48,6 +51,8 @@ export async function main(argv: readonly string[]): Promise<number> {
       return check(rest);
     case "handoff":
       return handoff(rest);
+    case "usage":
+      return usage(rest);
     case undefined:
     case "-h":
     case "--help":
@@ -55,7 +60,7 @@ export async function main(argv: readonly string[]): Promise<number> {
       process.stdout.write(USAGE);
       return 0;
     case "--version":
-      process.stdout.write("guardian 0.1.0\n");
+      process.stdout.write("guardian 0.1.1\n");
       return 0;
     default:
       process.stderr.write(`Unknown command: ${command}\n\n${USAGE}`);

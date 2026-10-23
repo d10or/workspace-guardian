@@ -6,12 +6,12 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.15.0'
+const VERSION = '0.16.0'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
   home: '', cfg: '', sessions: '', projects: '', data: '', bus: '',
-  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '', msgsDir: '',
+  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '', msgsDir: '', usageDir: '',
 }
 const MAX_MSGS = 200
 const MAX_HOPS = 4
@@ -192,10 +192,11 @@ async function ensurePaths($: any) {
   P.msgs = `${P.data}/messages.json`
   P.claimsDir = `${P.data}/claims`
   P.msgsDir = `${P.data}/messages`
+  P.usageDir = `${P.cfg}/guardian/usage`
   S.isMac = os.trim() === 'Darwin'
   // One-time carry-over from the folder earlier versions kept their data in.
   await $.process
-    .run(['sh', '-c', 'mkdir -p "$1" "$1/claims" "$1/messages"; for f in notes history pins messages prefs claims; do [ -f "$2/$f.json" ] && [ ! -f "$1/$f.json" ] && cp "$2/$f.json" "$1/$f.json"; done; true', 'sh', P.data, `${P.cfg}/lab-notes`])
+    .run(['sh', '-c', 'mkdir -p "$1" "$1/claims" "$1/messages" "$3"; for f in notes history pins messages prefs claims; do [ -f "$2/$f.json" ] && [ ! -f "$1/$f.json" ] && cp "$2/$f.json" "$1/$f.json"; done; true', 'sh', P.data, `${P.cfg}/lab-notes`, `${P.cfg}/guardian/usage`])
     .catch(() => undefined)
 }
 
@@ -847,6 +848,29 @@ async function releaseClaims($: any, rawPaths: string[]): Promise<string> {
   return before === 0 ? 'You have no active claims.' : `Released ${before - after} claim${before - after === 1 ? '' : 's'}.`
 }
 
+// --- Local usage counts (counts only, never a path; shared by the CLI's `guardian usage`) ---
+type UsageEvent = 'session_start' | 'hold_asked' | 'task_add' | 'task_done'
+async function recordUsage($: any, event: UsageEvent) {
+  try {
+    if (P.usageDir === '' || S.sessionId === '') return
+    const file = `${P.usageDir}/mod-${S.sessionId}.json`
+    const day = new Date(await $.clock.now()).toISOString().slice(0, 10)
+    let cur: { v: 1; installId: string; firstSeen: string; days: Record<string, Record<string, number>> } | null = null
+    try {
+      const parsed = JSON.parse(await $.fs.read(file))
+      if (parsed && parsed.v === 1 && parsed.days) cur = parsed
+    } catch {
+      // first write
+    }
+    if (cur === null) cur = { v: 1, installId: Math.random().toString(16).slice(2, 14).padEnd(12, '0'), firstSeen: day, days: {} }
+    const d = (cur.days[day] ??= {})
+    d[event] = (d[event] ?? 0) + 1
+    await $.fs.write(file, JSON.stringify(cur))
+  } catch {
+    // best effort, never in the way
+  }
+}
+
 // --- Task ownership (shared by every worktree of the repo) -----------------
 const tasksFile = () => taskFilePath(S.project || `${S.root}/.git`)
 
@@ -887,6 +911,7 @@ async function addTask($: any, args: string): Promise<string> {
   const task: TaskRow = { id: r.id, paths: r.paths, branch: r.branch, owner: myName, note: r.note, createdAt: now, status: 'active' }
   const overlaps = tasksOverlap([...existing.filter(t => t.id !== r.id), task]).filter(o => o.a.id === r.id || o.b.id === r.id)
   await saveTasks($, list => [...list.filter(t => t.id !== r.id), task])
+  void recordUsage($, 'task_add')
   const warn = overlaps.length
     ? ` Warning: overlaps ${overlaps.map(o => `${o.a.id === r.id ? o.b.id : o.a.id} on ${o.on}`).join('; ')}. Narrow the paths or sequence the work.`
     : ''
@@ -898,6 +923,7 @@ async function finishTask($: any, id: string): Promise<string> {
   const list = await loadTasks($)
   if (!list.some(t => t.id === id && t.status === 'active')) return `No active task "${id}".`
   await saveTasks($, l => l.map(t => (t.id === id ? { ...t, status: 'done' as const } : t)))
+  void recordUsage($, 'task_done')
 
   return `Task ${id} marked done; its paths are released.`
 }
@@ -1327,6 +1353,7 @@ export const register: Register = on => {
     }
     void usageTick($)
     await tick($)
+    void recordUsage($, 'session_start')
 
     return next(e)
   })
@@ -1350,6 +1377,7 @@ export const register: Register = on => {
       if (violated !== undefined) {
         const q = `Task ${violated.id} owns ${violated.paths.join(', ')} on ${violated.branch}; this session is on ${S.branch}. Allow editing ${rel}?`
         let answer = 'Deny'
+        void recordUsage($, 'hold_asked')
         try {
           answer = await $.ui.ask(q, { header: 'Ownership', options: ['Allow once', 'Allow this task for the session', 'Deny'] })
         } catch {

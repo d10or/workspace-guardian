@@ -2,6 +2,7 @@
 import { loadContext, NotARepo, touchedPaths } from "../lib/context.ts";
 import { activeTasks } from "../lib/tasks.ts";
 import { eprintln, json, parse, println, SCHEMA_VERSION } from "../lib/output.ts";
+import { record } from "../lib/usage.ts";
 
 export async function inspect(args: readonly string[]): Promise<number> {
   const a = parse(args, { json: { type: "boolean", default: false }, base: { type: "string" } });
@@ -16,6 +17,7 @@ export async function inspect(args: readonly string[]): Promise<number> {
     eprintln(`guardian inspect: ${err instanceof NotARepo ? err.message : String(err)}`);
     return 1;
   }
+  record("inspect");
   const tasks = activeTasks(ctx.tasks).map((t) => ({
     ...t,
     worktree: ctx.worktrees.find((w) => w.branch === t.branch)?.path ?? null,

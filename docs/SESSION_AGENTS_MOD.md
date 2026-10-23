@@ -105,6 +105,12 @@ informational only. Adding a task whose paths overlap another active task warns 
 Overview tab lists such overlaps under "Needs attention". Each session's system prompt also lists
 the active tasks, so Claude knows the boundaries before it edits.
 
+## Usage counts
+
+The mod writes a small per-session counter file under `<claude config>/guardian/usage/` (session
+starts, ownership holds, tasks added or finished, by day). No paths, no names, no content, and nothing
+leaves the machine. `guardian usage` prints the merged counts; `guardian usage --reset` deletes them.
+
 ## The edit pause
 
 If another session on the same project edited a file in the last 10 minutes, or has claimed it, the **first** attempt to edit it is refused with the reason and a hint to message that session. Repeating the same edit within 5 minutes goes through. It only sees edits made through Claude's edit tools by sessions that also run this plugin, and not changes made by shell commands. Turn it off in **Actions** with "pause on files another session just edited".

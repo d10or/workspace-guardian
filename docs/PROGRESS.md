@@ -2,6 +2,13 @@
 
 Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or command, never a claim.
 
+## 2026-10-23 — G6 measurement in place
+
+- **Done:** local usage counters (CLI + mod) and `guardian usage`, so activation and repeat use are
+  measurable without telemetry. Evidence: `tests/usage.test.ts` (asserts no path or id is ever written),
+  `docs/PRIVACY.md`. Repo traffic since push: 168 clones / 75 uniques, attributed to CI, installs and
+  crawlers, not users (no posts yet).
+
 ## 2026-10-20 (later) — G2 closed; G3–G6 prepared
 
 - **Decision (D6):** founder requires that nobody can take the project and offer it as their own. Public repo relicensed from MIT to PolyForm Shield 1.0.0 (use and modify freely, no competing products); GitHub traffic showed 0 clones / 0 forks at the time. Private repo `workspace-guardian-pro` created for all paid features. awesome-claude-code channel dropped.

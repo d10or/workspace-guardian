@@ -11,6 +11,7 @@ import { git, treeFingerprint } from "../lib/git.ts";
 import { activeTasks, globMatches } from "../lib/tasks.ts";
 import { eprintln, json, parse, println, SCHEMA_VERSION, type Finding } from "../lib/output.ts";
 import { localBranches } from "./check.ts";
+import { record } from "../lib/usage.ts";
 
 type TestEvidence =
   | { status: "verified"; command: string; exitCode: number; durationMs: number; fingerprint: string; tail: string }
@@ -106,6 +107,8 @@ export async function handoff(args: readonly string[]): Promise<number> {
     nextSteps: nextSteps(wt, ctx.base, tests, findings, outside),
   };
 
+  record("handoff");
+  if (tests.status === "verified") record("handoff_verified");
   const md = toMarkdown(report);
   if (a.values.out) {
     mkdirSync(path.dirname(path.resolve(a.values.out)), { recursive: true });

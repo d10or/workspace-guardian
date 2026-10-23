@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (CLI) / 0.16.0 (mod) — 2026-10-23
+- `guardian usage`: local, counts-only usage summary (activation and repeat use for the pilot); `GUARDIAN_NO_USAGE=1` disables, `--reset` deletes. The mod records session starts, ownership holds and task events the same way.
+- Public repo relicensed from MIT to PolyForm Shield 1.0.0 (2026-10-20); paid features move to a private repository.
+- Messages are written one file per session (mod 0.15.0).
+
 ## 0.1.0 — 2026-10-20
 
 First public release.

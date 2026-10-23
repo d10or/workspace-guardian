@@ -17,7 +17,7 @@ export function write(root: string, rel: string, text: string) {
 }
 
 export function guardian(cwd: string, ...args: string[]) {
-  const r = spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: "utf8", env: { ...process.env, NO_COLOR: "1" } });
+  const r = spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: "utf8", env: { ...process.env, NO_COLOR: "1", GUARDIAN_HOME: process.env.GUARDIAN_HOME ?? "/nonexistent-guardian-home", GUARDIAN_NO_USAGE: process.env.GUARDIAN_NO_USAGE ?? "1" } });
   return { code: r.status ?? -1, out: r.stdout, err: r.stderr, json: () => JSON.parse(r.stdout) as any };
 }
 
