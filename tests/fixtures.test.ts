@@ -84,9 +84,10 @@ test("fixture: Claude Code's native worktree location (.claude/worktrees/<name>)
 test("fixture: unicode and quoted path names survive the NUL-separated status parse", () => {
   const { main, auth } = repoWithWorktrees();
   guardian(main, "task", "add", "--id", "AUTH", "--paths", "src/auth/**", "--branch", "feature/auth", "--yes");
-  write(auth, "src/auth/héllo wörld \"q\".ts", "1\n");
+  const name = process.platform === "win32" ? "src/auth/héllo wörld.ts" : 'src/auth/héllo wörld "q".ts'; // quotes are illegal in Windows names
+  write(auth, name, "1\n");
   const h = guardian(auth, "handoff", "--task", "AUTH", "--json").json();
-  assert.ok(h.changedPaths.includes('src/auth/héllo wörld "q".ts'));
+  assert.ok(h.changedPaths.includes(name));
 });
 
 test("fixture: handoff --evidence is marked supplied, not verified; --out writes JSON with --json", () => {

@@ -32,9 +32,10 @@ test('claim_files with no paths is refused with a reason', async $ => {
 })
 
 // --- task ownership -------------------------------------------------------------------------
-const TASKS = JSON.stringify({ version: 1, tasks: [{ id: 'AUTH', paths: ['src/auth/**'], branch: 'feature/auth', owner: 'x', note: '', createdAt: 1, status: 'active' }] })
+// `**/src/auth/**` matches whether the kit gives the hook a root-relative path or an absolute one (Windows).
+const TASKS = JSON.stringify({ version: 1, tasks: [{ id: 'AUTH', paths: ['**/src/auth/**'], branch: 'feature/auth', owner: 'x', note: '', createdAt: 1, status: 'active' }] })
 // In the kit the session root is empty, so a root-relative path is given as /<rel>.
-const isTasksFile = (path: string) => path.endsWith('/.guardian/tasks.json')
+const isTasksFile = (path: string) => path.replace(/\\/g, '/').endsWith('/.guardian/tasks.json')
 
 test('an edit inside a task owned by another branch is held, and denied when the question is dismissed', async ($, on) => {
   mock.clock(on, { now: 1_790_000_000_000 })

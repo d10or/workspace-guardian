@@ -23,7 +23,8 @@ export function guardian(cwd: string, ...args: string[]) {
 
 /** main with one commit, plus worktrees on feature/auth and feature/api branched from it. */
 export function repoWithWorktrees() {
-  const dir = realpathSync(mkdtempSync(path.join(tmpdir(), "guardian-"))); // git reports real paths (/private/var on macOS)
+  // git prints real, long, forward-slashed paths (/private/var on macOS; C:/Users/runneradmin not RUNNER~1 on Windows)
+  const dir = realpathSync.native(mkdtempSync(path.join(tmpdir(), "guardian-"))).replace(/\\/g, "/");
   const main = path.join(dir, "main");
   mkdirSync(main);
   sh(main, "init", "-q", "-b", "main");
