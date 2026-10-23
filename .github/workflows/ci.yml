@@ -34,9 +34,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-    # `claude plugin validate|test` run offline once the CLI is installed; proven on ubuntu (run 39390316230).
-    # Windows is allowed to fail until it has passed once.
-    continue-on-error: ${{ matrix.os == 'windows-latest' }}
+    # `claude plugin validate|test` run offline once the CLI is installed; proven on ubuntu (run 39390316230)
+    # and windows (commit 7007167).
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -7,8 +7,9 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 - **Windows support (founder request):** CLI 0.2.1 and mod 0.17.0. CLI: separator/case-insensitive
   path comparison, `handoff --run` via the shell on Windows, CI matrix now ubuntu + macos + windows.
   Mod: PowerShell fallbacks (home/config, mkdir, transcript tail, process liveness), `python`
-  fallback, Windows-safe relative paths. Evidence: CI run on windows-latest (see Actions); no local
-  Windows machine was available, so the runner is the proof.
+  fallback, Windows-safe relative paths. Evidence: commit 7007167, all five CI jobs green including
+  `cli (windows-latest)` and `session-agents mod (windows-latest)`; no local Windows machine was
+  available, so the runner is the proof. Released as v0.2.1.
 
 - **Released:** v0.2.0 (CLI 0.2.0 + mod 0.16.0), CI green on `8b18bff`.
 - **Decision (D7):** checkout on Lemon Squeezy. **Done:** buyer packaging (`npm run pack` → tarball),

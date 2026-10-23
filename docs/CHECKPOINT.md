@@ -1,6 +1,6 @@
 # Checkpoint (living state; rewritten by /checkpoint, injected at every session start)
 
-**Updated:** 2026-10-23 (end of day) · **Current gate:** G3 private alpha; G1, G2 closed; G5 engineering complete · **Release:** v0.2.0 public at https://github.com/d10or/workspace-guardian (CLI 0.2.1, mod 0.17.0 pending CI); Pro 0.1.0 private at `d10or/workspace-guardian-pro` (615c22b)
+**Updated:** 2026-10-23 (end of day) · **Current gate:** G3 private alpha; G1, G2 closed; G5 engineering complete · **Release:** v0.2.0 public at https://github.com/d10or/workspace-guardian (CLI 0.2.1, mod 0.17.0; CI green on ubuntu, macos, windows at 7007167); Pro 0.1.0 private at `d10or/workspace-guardian-pro` (615c22b)
 
 ## Founder actions pending (nothing here can be done from a session)
 - G3-02 alpha outreach: send the message in `docs/ALPHA_OUTREACH.md` to five people from its target list; log in the Alpha Testers sheet. 0 of 5 so far.
@@ -31,7 +31,7 @@
 - Mod 0.16.0: `claude plugin test` 16 pass; `claude plugin validate` clean.
 - End-to-end verified today: real tarball → `guardian pro install` → key from `npm run fulfil` → `guardian license add` → `guardian check` prints the scored merge plan on `demo/scenarios.sh risky`.
 - Usage counters: `<claude config>/guardian/usage/` (CLI `cli.json`, mod `mod-<session>.json`), merged by `guardian usage`; counts only, never paths.
-- Known gaps: Windows supported from CLI 0.2.1 / mod 0.17.0 but only CI-verified (no Windows machine here); mod Jump button macOS-only; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files; offline keys cannot be revoked instantly (revoked.json ships with releases).
+- Known gaps: Windows verified only by CI (commit 7007167, all five jobs green), not by a human on a Windows machine yet; mod Jump button macOS-only; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files; offline keys cannot be revoked instantly (revoked.json ships with releases).
 
 ## Open questions for the founder
 - Jurisdiction / payout details for the Lemon Squeezy store.
