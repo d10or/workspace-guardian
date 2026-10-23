@@ -25,7 +25,7 @@ export function guardian(cwd: string, ...args: string[]) {
 export function repoWithWorktrees() {
   // git prints real, long, forward-slashed paths (/private/var on macOS; C:/Users/runneradmin not RUNNER~1 on Windows)
   const dir = realpathSync.native(mkdtempSync(path.join(tmpdir(), "guardian-"))).replace(/\\/g, "/");
-  const main = path.join(dir, "main");
+  const main = `${dir}/main`; // keep "/" so the paths equal what git prints on Windows
   mkdirSync(main);
   sh(main, "init", "-q", "-b", "main");
   write(main, "src/auth/a.ts", "export const a = 1\n");
@@ -34,8 +34,8 @@ export function repoWithWorktrees() {
   write(main, "package-lock.json", "{}\n");
   sh(main, "add", "-A");
   sh(main, "commit", "-q", "-m", "init");
-  const auth = path.join(dir, "wt-auth");
-  const api = path.join(dir, "wt-api");
+  const auth = `${dir}/wt-auth`;
+  const api = `${dir}/wt-api`;
   sh(main, "worktree", "add", "-q", "-b", "feature/auth", auth);
   sh(main, "worktree", "add", "-q", "-b", "feature/api", api);
   return { dir, main, auth, api };

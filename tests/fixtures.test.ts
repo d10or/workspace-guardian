@@ -22,7 +22,7 @@ test("fixture: symlink and deleted file count as changes, symlink target is not 
 
 test("fixture: a detached-HEAD worktree is inspected but never matched to a task", () => {
   const { main, dir } = repoWithWorktrees();
-  const det = path.join(dir, "wt-detached");
+  const det = `${dir}/wt-detached`;
   sh(main, "worktree", "add", "-q", "--detach", det);
   write(det, "src/auth/a.ts", "detached edit\n");
   guardian(main, "task", "add", "--id", "AUTH", "--paths", "src/auth/**", "--branch", "feature/auth", "--yes");
