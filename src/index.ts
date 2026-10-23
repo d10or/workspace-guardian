@@ -15,6 +15,7 @@ import { check } from "./commands/check.ts";
 import { handoff } from "./commands/handoff.ts";
 import { usage } from "./commands/usage.ts";
 import { license } from "./commands/license.ts";
+import { pro } from "./commands/pro.ts";
 
 const USAGE = `guardian — coordinate parallel AI coding sessions on one repo
 
@@ -33,6 +34,8 @@ Usage:
       open risks, next steps. Read-only unless --out is given.
   guardian license add <key> | show | remove
       Offline Pro key (optional). Verified locally with an embedded public key; never phones home.
+  guardian pro install <tarball> | status | remove
+      Install the paid Pro package (delivered by the checkout) under the guardian home. Offline.
   guardian usage [--json] [--reset]
       Local usage counts (no paths, nothing sent) to share voluntarily. GUARDIAN_NO_USAGE=1 disables.
 
@@ -58,6 +61,8 @@ export async function main(argv: readonly string[]): Promise<number> {
       return usage(rest);
     case "license":
       return license(rest);
+    case "pro":
+      return pro(rest);
     case undefined:
     case "-h":
     case "--help":

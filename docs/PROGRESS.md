@@ -4,6 +4,11 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
+- **Decision (D7):** checkout on Lemon Squeezy. **Done:** buyer packaging (`npm run pack` → tarball),
+  `guardian pro install|status|remove`, manual fulfilment script (`npm run fulfil`), founder setup guide
+  `docs/CHECKOUT_LEMONSQUEEZY.md` with page copy for variant A. Engineering for G5 is complete; what
+  remains is the store itself and real buyers.
+
 - **Done:** Pro 0.1.0 in the private repo `workspace-guardian-pro` (commit 400c0cb): policies, scored
   merge plan with rebase steps, framework hotspot packs, custom rules; keygen/sign scripts; keypair
   generated outside the repos. Free core 0.2.0: `guardian license`, offline verification, Pro loader.

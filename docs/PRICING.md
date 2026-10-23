@@ -30,7 +30,7 @@ Pass mark per plan: 3 real buyers (stretch 5), refunds excluded, no friends-and-
 
 ## Checkout and fulfilment
 
-- Lemon Squeezy or Gumroad (both handle VAT/sales tax as merchant of record; founder picks after checking the intended jurisdiction).
+- **Lemon Squeezy** (founder decision 2026-10-23): merchant of record for VAT/sales tax, delivers the tarball, two variants for the price test. Setup and fulfilment steps: `docs/CHECKOUT_LEMONSQUEEZY.md`.
 - Fulfilment: the checkout emails a license key. `guardian license add <key>` (CLI) or `/license <key>` (mod) writes it to `<claude config>/guardian/license.json`; features check it offline with a signed key (Ed25519 public key embedded; no phone-home).
 - Refund policy: 30 days, no questions, stated on the page.
 - Support contact: a dedicated email on the page.

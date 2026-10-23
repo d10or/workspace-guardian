@@ -119,3 +119,35 @@ test("a valid key without the Pro package degrades to free with a note", () => {
     assert.match(out, /Pro package is not installed/);
   });
 });
+
+test("guardian pro install unpacks a real-shaped tarball, rejects a foreign one, and check uses it", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const home = mkdtempSync(path.join(tmpdir(), "guardian-pro-home-"));
+  const build = mkdtempSync(path.join(tmpdir(), "guardian-pro-build-"));
+  mkdirSync(path.join(build, "package", "dist"), { recursive: true });
+  writeFileSync(path.join(build, "package", "package.json"), JSON.stringify({ name: "@workspace-guardian/pro", version: "9.9.9", type: "module", main: "./dist/index.js" }));
+  writeFileSync(path.join(build, "package", "dist", "index.js"), `export const version = "9.9.9"; export function mergePlan(i) { return { order: [], steps: ["from tarball"] }; }`);
+  execFileSync("tar", ["-C", build, "-czf", path.join(build, "pro.tgz"), "package"]);
+  mkdirSync(path.join(build, "bad"));
+  writeFileSync(path.join(build, "bad", "x.txt"), "nope");
+  execFileSync("tar", ["-C", build, "-czf", path.join(build, "bad.tgz"), "bad"]);
+  withEnv({ GUARDIAN_HOME: home, GUARDIAN_PUBKEY_PEM: PUB }, () => {
+    const { main } = repoWithWorktrees();
+    assert.match(guardian(main, "pro", "status").out, /not installed/);
+    assert.equal(guardian(main, "pro", "install", path.join(build, "bad.tgz")).code, 1);
+    const inst = guardian(main, "pro", "install", path.join(build, "pro.tgz"));
+    assert.equal(inst.code, 0, inst.err);
+    assert.match(inst.out, /Pro 9\.9\.9 installed/);
+    const st = guardian(main, "pro", "status", "--json").json();
+    assert.equal(st.installed, true);
+    assert.equal(st.active, false, "no key yet");
+    guardian(main, "license", "add", makeKey());
+    const st2 = guardian(main, "pro", "status", "--json").json();
+    assert.equal(st2.active, true);
+    assert.equal(st2.version, "9.9.9");
+    guardian(main, "task", "add", "--id", "A", "--paths", "src/**", "--branch", "feature/auth", "--yes");
+    assert.equal(guardian(main, "check", "--json").json().pro.plan.steps[0], "from tarball");
+    assert.equal(guardian(main, "pro", "remove").code, 0);
+    assert.match(guardian(main, "check").out, /Pro package is not installed/);
+  });
+});
