@@ -255,6 +255,8 @@ empty CLI. Founder decision 2026-10-20: H1 (problem frequency) is treated as val
 
 **License decision (founder, 2026-10-20):** the free core is source-available under PolyForm Shield 1.0.0, not open-source: anyone may use and modify it, including at work, but may not use it to provide a competing product. All paid features are developed in the private repository `d10or/workspace-guardian-pro` and shipped as license-gated builds. Risk R7 note: MIT applied for a few hours with no recorded clones. The awesome-claude-code channel is dropped; the Anthropic directory remains available.
 
+**Founding price (founder, 2026-10-23):** Pro launches at $1/month for the first 30 days or 100 buyers, grandfathered for life, as a paid-feedback cohort; standard prices follow. The free core stays free and public: no marketplace can sell a mod, and the directory lists free plugins only, so the install funnel must stay open. Supersedes the "test two prices at G5" sequencing: the founding window runs first, the A/B after.
+
 **Pricing direction (founder, 2026-10-20):** do not anchor on $29. Aim for a low price and volume:
 a small one-time price in the $5–$12 band, or a few dollars a month, so that doubling a small user
 count still produces meaningful revenue and the purchase is impulse-sized for someone already paying

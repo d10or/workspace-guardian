@@ -19,14 +19,24 @@ non-open-source projects; the Anthropic directory has no open-source requirement
 The free tier must stay good enough that a solo developer never needs Pro. Pro sells to the person
 who merges several agent branches a day.
 
-## Two price messages to test (one per week, same page, same traffic source)
+## Founding price (decision 2026-10-23): run first, from launch day
+
+Pro at **$1 per month** for the first 30 days after the public launch, or the first 100 buyers,
+whichever comes first. Founding members keep $1/month for as long as they stay subscribed. The point
+is signal, not revenue: a buyer answers feedback requests, and a payment is the only evidence the plan
+accepts for G5. Lemon Squeezy nets about $0.45 per dollar after fees. Every founding buyer receives
+the alpha feedback questions by email within a day of purchase and a direct reply address.
+
+After the founding window the standard prices below apply; founders are grandfathered.
+
+## Two standard price messages to test after the founding window (one per week, same page)
 
 | Message | Price | Frame |
 |---|---|---|
 | A | $9 one-time | "Less than one hour of the conflicts it prevents. Yours forever." |
 | B | $4 / month, cancel any time | "Pays for itself the first time it catches a collision." |
 
-Pass mark per plan: 3 real buyers (stretch 5), refunds excluded, no friends-and-family.
+Pass mark per plan: 3 real buyers (stretch 5), refunds excluded, no friends-and-family. Founding-price buyers count.
 
 ## Checkout and fulfilment
 

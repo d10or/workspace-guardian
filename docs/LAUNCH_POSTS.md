@@ -32,6 +32,8 @@ What it does not do: merge, rebase, push, resolve conflicts, or run anything in 
 GIF of a collision being caught: [link]
 
 Install (Claude Code 2.1.287+): `/plugin install session-agents --marketplace d10or/workspace-guardian`
+
+There is a paid Pro layer (scored merge plan with rebase steps, per-repo CI policies, framework hotspot packs). Founding price for the first 30 days: $1 a month, kept for life. I mention it because paying users are who I will listen to first.
 CLI: clone, `npm install && npm run build && npm link`.
 
 macOS, Linux and Windows. I would value hearing which findings are true risks and which are noise on your repos; the check is deliberately conservative and labelled advisory.
@@ -74,7 +76,7 @@ I would like to know where the heuristics produce noise on real repos.
 
 5/ Handoff that cannot lie: `guardian handoff --task AUTH --run 'npm test'` says "verified" only if it ran the tests itself, with the exit code and a tree fingerprint. Otherwise: "not verified". [handoff.gif]
 
-6/ It never merges, rebases, or pushes. It flags risk; you decide.
+6/ It never merges, rebases, or pushes. It flags risk; you decide. Pro (merge plan + CI policies) is $1/month for founding members this month, kept for life.
 Install: `/plugin install session-agents --marketplace d10or/workspace-guardian`
 https://github.com/d10or/workspace-guardian
 Tell me where it is noisy on your repo.
@@ -114,4 +116,4 @@ The list rejects projects that are not open-source or that gate features behind 
 - "What about Conductor / Claude Squad?" — Session managers. Guardian sits beside them; it does not launch sessions.
 - "Can an agent bypass the hold?" — Through the Edit/Write tools, no. Through a shell `cp` or redirect, yes; the same blind spot Claude Code's own guard documents. `guardian check` sees it afterwards via git.
 - "Windows?" — Yes, since 0.17.0 / CLI 0.2.1; CI runs on windows-latest. The Jump-to-terminal button is macOS-only.
-- "Is it free?" — The core is free to use and modify, including at work, under PolyForm Shield: the one thing you may not do is ship it as a competing product. A small paid tier may come later for merge planning and CI policies.
+- "Is it free?" — The core is free to use and modify, including at work, under PolyForm Shield: the one thing you may not do is ship it as a competing product. Pro (merge plan, policies, hotspot packs) is $1 a month for founding members in the first 30 days, kept for life; $4/month or $9 once after that. Link on the README.

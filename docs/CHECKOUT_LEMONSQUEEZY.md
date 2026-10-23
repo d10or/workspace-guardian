@@ -11,10 +11,11 @@ upgrade once volume justifies it.
    jurisdiction. Lemon Squeezy collects and remits tax as merchant of record.
 2. **Product.** "Workspace Guardian Pro". Description: copy the Pro paragraph from the README. Tax
    category: software / digital goods.
-3. **Two variants** (the price test from `docs/PRICING.md`):
-   - A — "Pro, one-time" $9, single payment, license: not using Lemon Squeezy's license keys (ours are offline).
-   - B — "Pro, monthly" $4/month, subscription, cancel any time.
-   Only one variant is visible at a time: week 1 shows A, week 2 shows B.
+3. **Three variants** (`docs/PRICING.md`):
+   - F — "Founding member" **$1/month**, subscription, cancel any time. Visible from launch day for 30 days or 100 buyers. Lemon Squeezy's own license keys stay off; ours are offline.
+   - A — "Pro, one-time" $9, single payment.
+   - B — "Pro, monthly" $4/month, subscription.
+   Only one variant is visible at a time: F first; then A for a week, then B for a week. Existing F subscribers keep their price (do not edit the F variant's price; archive it instead).
 4. **File delivery.** Upload `release/workspace-guardian-pro-0.1.0.tgz` (built with `npm run pack` in
    the Pro repo) as the product file. Lemon Squeezy emails the download link on purchase.
 5. **Refund policy** text on the product page: "30 days, no questions, reply to your receipt."
@@ -29,7 +30,7 @@ Lemon Squeezy emails you "New order". Then, in the Pro repo:
 
 ```sh
 npm run fulfil -- <order-id> <buyer-email>          # one-time key, never expires
-npm run fulfil -- <order-id> <buyer-email> 2026-12-23  # subscription: expiry = next renewal + 7 days grace
+npm run fulfil -- <order-id> <buyer-email> 2026-12-23  # subscription (founding or monthly): expiry = next renewal + 7 days grace; re-issue each month until the webhook signer exists
 ```
 
 It prints the key and the full email. Send it from the support address. Log the order id, date, variant,
@@ -45,6 +46,16 @@ After the pilot, or at more than ~5 orders a week: a Cloudflare Worker receives 
 webhook (verify the `X-Signature` HMAC with the signing secret), signs the key with the private key
 stored as a Worker secret, and sends it through an email API. Until then the private key never leaves
 `~/.config/workspace-guardian/signing-key.pem` on this machine. Back that file up offline now.
+
+## Page copy (variant F, founding)
+
+**Workspace Guardian Pro — founding price: $1 a month, kept for life.**
+The free core tells you where parallel Claude Code sessions collide. Pro tells you what to do about it:
+a scored merge plan with the exact rebase order and the files to resolve by hand, per-repo policies for
+CI (`.guardian/policy.json`), and hotspot packs for Next.js, Django, Rails, monorepos and Terraform.
+Offline, no account, no telemetry. The first 100 members, or everyone who joins in the first 30 days,
+pay $1 a month for as long as they stay. After that it is $4 a month or $9 once. Cancel any time.
+30-day refund, no questions. You will get one short email asking what to fix; answer it or not.
 
 ## Page copy (variant A)
 
