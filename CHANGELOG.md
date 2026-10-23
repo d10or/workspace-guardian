@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.17.1 (mod) — 2026-10-23
+- The control-tower tab row wraps on narrow panes (desktop app and VS Code side panels); found live in the desktop app, where Messages/Usage/Actions/Notes were cut off.
+
 ## 0.2.1 (CLI) / 0.17.0 (mod) — 2026-10-23
 - Windows support: CLI path comparisons are separator- and case-insensitive on Windows; `handoff --run` goes through the shell there so npm shims resolve; CI runs on windows-latest. Mod: PowerShell fallbacks for home/config detection, directory creation, transcript tail and process liveness; `python` fallback for `python3`; Windows-safe relative paths for holds and claims.
 

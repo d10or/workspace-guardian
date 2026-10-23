@@ -80,7 +80,7 @@ To remove it: `claude plugin uninstall session-agents@session-agents`. Your save
 |---|---|
 | Terminal (`claude` CLI) | used daily; live-verified |
 | VS Code extension (2.1.299+) | pane validated against the VS Code element table by `hooks/surfaces.test.ts`; live check: open the repo in VS Code, start Claude Code, type `/sessions` |
-| Desktop app, Code tab | pane validated against the desktop element table by the same test; live check pending (app not installed on the dev machine; download from https://claude.ai/download) |
+| Desktop app, Code tab | **live-confirmed 2026-10-23** (pane, band, toasts, status line, peer discovery); tab row cut-off fixed in 0.17.1 |
 | Mobile | pane validated against the mobile element table; no live check planned for the pilot |
 | `claude -p` | hooks run, nothing is drawn (by design) |
 

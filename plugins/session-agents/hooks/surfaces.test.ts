@@ -15,3 +15,16 @@ for (const surface of ['terminal', 'desktop', 'vscode', 'mobile'] as const) {
   })
 
 }
+
+// Narrow panes (desktop / VS Code side panels) must still show every tab: the tab row wraps.
+for (const surface of ['desktop', 'vscode'] as const) {
+  test(`all eight tabs are present on a narrow ${surface} pane`, async ($, on) => {
+    mock.clock(on, { now: 1_790_000_000_000 })
+    const ui = await $.ui.mount({ plugin: 'session-agents', surface, component: 'Pane', requestId: 'session-agents', props: { bodyColumns: 40 } })
+    for (const label of [/Overview/, /Sessions/, /^○ Git$/, /History/, /Messages/, /Usage/, /Actions/, /Notes/]) {
+      const found = await ui.find({ type: 'Button', label })
+      if (found === undefined) throw new Error(`${surface}: tab ${label} missing at 40 columns`)
+    }
+    await ui.unmount()
+  })
+}

@@ -6,7 +6,7 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.17.0'
+const VERSION = '0.17.1'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
@@ -2024,7 +2024,8 @@ export const register: Register = on => {
 
     const tree = (
       <Box flexDirection="column" gap={1}>
-        <Box gap={1}>
+        {/* wraps on narrow panes (desktop / VS Code side panels) so no tab is cut off */}
+        <Box gap={1} flexWrap="wrap">
           {tabBtn('overview', 'Overview')}
           {tabBtn('sessions', others.length === allPeers.length ? `Sessions ${allPeers.length}` : `Sessions ${others.length}/${allPeers.length}`)}
           {tabBtn('git', 'Git')}
