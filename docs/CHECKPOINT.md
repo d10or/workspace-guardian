@@ -22,6 +22,7 @@
 - 2026-10-17: wedge = task ownership + preflight overlap; handoff/merge-readiness are fast-follow (Radar exists).
 - 2026-10-20: public repo under PolyForm Shield 1.0.0 (source-available, noncompete), superseding MIT the same day with 0 clones recorded; all paid code in the private repo; awesome-claude-code listing dropped. Founder reconsidered "fully private" on 2026-10-20 and chose to keep this.
 - 2026-10-20: low-price volume pricing; test $9 one-time (A) vs $4/month (B) at G5.
+- 2026-10-23: sales channel is Lemon Squeezy only; Agensi.io gets a free SKILL.md wrapper after launch as a discovery experiment, never Pro.
 - 2026-10-23: founding price for Pro: $1/month for 30 days or 100 buyers, kept for life; free core stays free (no marketplace sells mods; the directory is free-only). Standard $9 / $4 A/B runs after the window.
 - 2026-10-23: checkout on Lemon Squeezy; manual key fulfilment during the pilot (`npm run fulfil -- <order> <email>` in the Pro repo); buyers run `guardian pro install <tgz>` then `guardian license add <key>`. Keys are offline Ed25519; public key embedded in `src/lib/license.ts`.
 - The mod is installed from GitHub (`d10or/workspace-guardian`), not the local folder. Git identity in both repos is the GitHub no-reply address; never the real email.

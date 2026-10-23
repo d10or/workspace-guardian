@@ -158,6 +158,7 @@ payment-free to qualify for awesome-claude-code.
 | 8 | Plugin hubs (claudepluginhub.com, claudemarketplaces.com) and GitHub topics `claude-code-hooks`, `claude-code-plugin` | low effort, compounding SEO | G4 |
 | 9 | Product Hunt | worked for desktop apps, weak for CLIs | optional |
 | 10 | Japanese / Korean dev communities (Zenn, Classmethod, GeekNews) | early amplifiers of ccusage, ccstatusline | G4+ |
+| 11 | Agensi.io and similar skill marketplaces: a **free** SKILL.md wrapper that points Cursor / Codex users at the CLI and the store | reaches non-Claude agent users; the CLI is agent-agnostic. Pro is never sold there (30% fee, their connector in the install path, SKILL.md cannot carry a package). Founder decision 2026-10-23: after launch data exists | after G4 |
 
 Traction pattern from the tools studied: Hacker News is hit-or-miss (about one in three breakout
 tools had a 100+ point thread). Reddit r/ClaudeAI, amplification by @claude_code, and being embedded

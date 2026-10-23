@@ -4,6 +4,7 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
+- **Decision (D9):** Lemon Squeezy confirmed as the only sales channel; a free skill wrapper on Agensi.io is deferred to after launch (channel 11 in RESEARCH_G1 §4).
 - **Decision (D8):** founding price $1/month for 30 days / 100 buyers, grandfathered; free core stays free.
   Pricing doc, store guide (variant F + page copy) and launch posts updated. Early pane feedback from
   people the founder showed it to was positive (pane only; no workflow completions logged yet).
