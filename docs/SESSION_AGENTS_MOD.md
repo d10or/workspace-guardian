@@ -74,6 +74,16 @@ Sessions that were already running keep the old version until they restart.
 
 To remove it: `claude plugin uninstall session-agents@session-agents`. Your saved data stays in `<claude config>/session-agents/` until you delete that folder.
 
+## Surfaces
+
+| Surface | Status |
+|---|---|
+| Terminal (`claude` CLI) | used daily; live-verified |
+| VS Code extension (2.1.299+) | pane validated against the VS Code element table by `hooks/surfaces.test.ts`; live check: open the repo in VS Code, start Claude Code, type `/sessions` |
+| Desktop app, Code tab | pane validated against the desktop element table by the same test; live check pending (app not installed on the dev machine; download from https://claude.ai/download) |
+| Mobile | pane validated against the mobile element table; no live check planned for the pilot |
+| `claude -p` | hooks run, nothing is drawn (by design) |
+
 ## Requirements
 
 - macOS, Linux, or Windows 10/11 (from 0.17.0: PowerShell and `tasklist` replace `sh`, `ps`, `tail` where those are missing; the Jump button is macOS-only).

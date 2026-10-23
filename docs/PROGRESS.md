@@ -4,6 +4,10 @@ Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or 
 
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
+- **Surfaces:** `hooks/surfaces.test.ts` mounts the pane on terminal, desktop, vscode and mobile
+  element tables: 4 pass. VS Code 1.143.1 + Claude Code extension 2.1.309 installed on the dev machine
+  for the live check; the desktop app must be downloaded by the founder (site blocks non-browser downloads).
+
 - **Windows support (founder request):** CLI 0.2.1 and mod 0.17.0. CLI: separator/case-insensitive
   path comparison, `handoff --run` via the shell on Windows, CI matrix now ubuntu + macos + windows.
   Mod: PowerShell fallbacks (home/config, mkdir, transcript tail, process liveness), `python`

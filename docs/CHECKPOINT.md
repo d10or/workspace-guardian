@@ -13,7 +13,7 @@
 - Nothing half-done. Working tree clean at `a1cbaa2`.
 
 ## Next engineering work (in order)
-1. Verify the mod on the desktop app and VS Code surfaces (needs those apps open); record which surfaces are confirmed in `docs/SESSION_AGENTS_MOD.md`.
+1. Live-confirm the mod in VS Code (installed 2026-10-23 with the Claude Code extension; open the repo, start Claude Code, `/sessions`) and in the desktop app (founder downloads it from claude.ai/download; curl is refused). Test-kit verification of all four surfaces is done (`hooks/surfaces.test.ts`).
 2. When the first alpha feedback arrives: triage into issues, fix the top three within the week, re-record clips if output text changed (`bash demo/record.sh`).
 3. Only if orders exceed ~5/week: Cloudflare Worker webhook signer (design in `docs/CHECKOUT_LEMONSQUEEZY.md`).
 
@@ -28,7 +28,7 @@
 ## State of the code (runs made 2026-10-23)
 - Free core: `npm test` 25 pass; `bash tests/hook.test.sh` ok; CI green on `8b18bff` (ubuntu, macos, mod job).
 - Pro (private repo): `npm test` 4 pass; `npm run pack` builds `release/*.tgz` (compiled JS only, no maps).
-- Mod 0.16.0: `claude plugin test` 16 pass; `claude plugin validate` clean.
+- Mod 0.17.0: `claude plugin test` 20 pass (incl. pane render on terminal/desktop/vscode/mobile); `claude plugin validate` clean.
 - End-to-end verified today: real tarball → `guardian pro install` → key from `npm run fulfil` → `guardian license add` → `guardian check` prints the scored merge plan on `demo/scenarios.sh risky`.
 - Usage counters: `<claude config>/guardian/usage/` (CLI `cli.json`, mod `mod-<session>.json`), merged by `guardian usage`; counts only, never paths.
 - Known gaps: Windows verified only by CI (commit 7007167, all five jobs green), not by a human on a Windows machine yet; mod Jump button macOS-only; shell writes (`cp`, redirects) invisible to the mod's hold; notes/pins/history still shared files; offline keys cannot be revoked instantly (revoked.json ships with releases).
