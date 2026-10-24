@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.18.1 (mod) — 2026-10-24
+- Plan limits are shared between sessions: whichever session can read them writes `limits.json`, and hosts that report none (seen in VS Code) show the latest copy with its source and time. The Usage tab says why a host has none, shows the last check time, offers **Check now**, and retries every 15 s until limits appear.
+
 ## 0.18.0 (mod) — 2026-10-23 — pane redesign
 - Header on every tab: traffic light (all clear / N to check / N risks), repo and branch, session and task counts, last refresh time, version.
 - Overview leads with what needs attention; tasks and claims merged into one **Ownership** card with the live session on each branch and overlaps marked in red.

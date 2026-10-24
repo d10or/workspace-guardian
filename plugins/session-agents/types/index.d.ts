@@ -101,7 +101,7 @@ export type UsageRow = {
   costUsd: number
 }
 
-export type UsageInfo = { at: number; limits: LimitRow[]; rows: UsageRow[] }
+export type UsageInfo = { at: number; limits: LimitRow[]; rows: UsageRow[]; limitsFrom: string; limitsAt: number; hostNote: string }
 
 export type Tab = 'overview' | 'sessions' | 'git' | 'notes' | 'history' | 'messages' | 'usage' | 'actions'
 

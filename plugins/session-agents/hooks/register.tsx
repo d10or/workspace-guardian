@@ -6,12 +6,12 @@ import type { AgentRow, ClaimRow, TaskRow, GitInfo, LimitRow, HistoryRow, Messag
 
 const PANE = 'session-agents'
 // Shown in the pane footer so you can tell which version a session loaded. Keep equal to plugin.json.
-const VERSION = '0.18.0'
+const VERSION = '0.18.1'
 // Everything under the user's Claude config folder is resolved at run time (ensurePaths), so the
 // plugin carries no machine- or user-specific path. Data lives in <config>/session-agents/.
 const P = {
   home: '', cfg: '', sessions: '', projects: '', data: '', bus: '',
-  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '', msgsDir: '', usageDir: '',
+  notes: '', history: '', pins: '', msgs: '', prefs: '', claims: '', claimsDir: '', msgsDir: '', usageDir: '', limits: '',
 }
 const MAX_MSGS = 200
 const MAX_HOPS = 4
@@ -112,6 +112,8 @@ const S = {
   tasksSeen: '',
   myCwd: '',
   usageBusy: false,
+  limitsSeen: false,
+  usageAttemptAt: 0,
   usageReady: false,
   usageCache: new Map<string, { off: number; inp: number; out: number; cc: number; cr: number; turns: number; last: number; model: string }>(),
   ctxWarned: new Map<string, number>(),
@@ -211,6 +213,7 @@ async function ensurePaths($: any) {
   P.claimsDir = `${P.data}/claims`
   P.msgsDir = `${P.data}/messages`
   P.usageDir = `${P.cfg}/guardian/usage`
+  P.limits = `${P.data}/limits.json`
   S.isMac = os.trim() === 'Darwin'
   S.isWin = os.trim() === 'Windows_NT'
   if (S.isWin) {
@@ -465,6 +468,7 @@ async function tick($: any) {
       parentId: a.parentAgentId,
     }))
 
+    if (!S.limitsSeen && now - S.usageAttemptAt > 15000) void usageTick($)
     if (S.tickNo++ % 3 === 0) {
       const info = await gatherGit($)
       await update($, gitAtom, old => (same(old, info) ? old : info))
@@ -1072,14 +1076,38 @@ async function usageTick($: any) {
     let myWindow = 0
     let myCtx: number | undefined
     let myCost = 0
+    S.usageAttemptAt = now
+    let limitsFrom = ''
+    let limitsAt = 0
+    let hostNote = ''
     try {
       const u = await $.session.usage()
       limits = (u.rateLimits ?? []).map((l: any) => ({ kind: String(l.kind), percentUsed: Number(l.percentUsed) || 0, resetsAt: String(l.resetsAt ?? '') }))
       myWindow = Number(u.context?.window) || 0
       myCtx = typeof u.context?.tokens === 'number' ? u.context.tokens : undefined
       myCost = Number(u.cost?.usd) || 0
-    } catch {
-      // not available in this host
+      if (limits.length === 0) hostNote = 'this host reported no plan limits yet (they appear after an API response on a subscription plan)'
+    } catch (err) {
+      hostNote = `this host does not expose plan limits (${String(err).slice(0, 60)})`
+    }
+    // Plan limits are account-wide: whichever session can read them shares them; the others show the latest copy.
+    if (limits.length > 0) {
+      S.limitsSeen = true
+      limitsFrom = S.myName || short(S.sessionId)
+      limitsAt = now
+      await $.fs.write(P.limits, JSON.stringify({ at: now, from: limitsFrom, limits })).catch(() => undefined)
+    } else {
+      try {
+        const shared = JSON.parse(await $.fs.read(P.limits))
+        if (shared && Array.isArray(shared.limits) && shared.limits.length > 0 && now - Number(shared.at) < 6 * 60 * 60 * 1000) {
+          limits = shared.limits
+          limitsFrom = String(shared.from ?? 'another session')
+          limitsAt = Number(shared.at) || 0
+          S.limitsSeen = true
+        }
+      } catch {
+        // nothing shared yet
+      }
     }
 
     const targets: { sessionId: string; name: string; cwd: string; isSelf: boolean }[] = [
@@ -1099,7 +1127,7 @@ async function usageTick($: any) {
     }
     rows.sort((a, b) => Number(b.isSelf) - Number(a.isSelf) || b.ctx / b.window - a.ctx / a.window)
 
-    const info: UsageInfo = { at: now, limits, rows }
+    const info: UsageInfo = { at: now, limits, rows, limitsFrom, limitsAt, hostNote }
     await update($, usageAtom, (old: UsageInfo | null) => (same(old, info) ? old : info))
 
     // Warn once when a session's context, or a plan window, crosses 80% / 95%.
@@ -1993,9 +2021,17 @@ export const register: Register = on => {
 
     const usageTab = [
       card('plan', 'Plan limits',
-        !usage || usage.limits.length === 0
-          ? <Text key="nolim" dimColor>not reported yet (only subscription plans report limits, after an API response)</Text>
-          : usage.limits.map(l => (
+        usage && usage.limits.length > 0 && usage.limitsFrom && usage.limitsFrom !== (S.myName || short(S.sessionId)) && (
+          <Text key="lfrom" dimColor wrap="wrap">shared by {usage.limitsFrom} at {hhmm(usage.limitsAt)} (plan limits are account-wide; this host did not report them itself)</Text>
+        ),
+        (!usage || usage.limits.length === 0) && (
+          <Box key="nolim" flexDirection="column">
+            <Text dimColor wrap="wrap">{usage?.hostNote || 'not checked yet'}. Any of your other sessions that can read them will share them here within 30s.</Text>
+            <Text dimColor>last check {usage ? hhmm(usage.at) : '…'}</Text>
+            {buttons('lchk', <Button key="lchk" label="Check now" onPress={() => usageTick($)} />)}
+          </Box>
+        ),
+        (usage?.limits ?? []).map(l => (
               <Box key={l.kind} flexDirection="column">
                 <Text wrap="truncate-end">
                   <Text bold>{LIMIT_LABEL[l.kind] ?? l.kind}</Text>
