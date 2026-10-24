@@ -2,6 +2,15 @@
 
 Newest first. Gate names refer to `MASTER_PLAN.md` §5. "Evidence" is a path or command, never a claim.
 
+## 2026-10-24 — second research round: broader pain points + six-week market scan
+
+- **Done:** `docs/RESEARCH_G2_IMPROVEMENTS.md`: 18 ranked pain points across Claude Code / Codex /
+  Gemini CLI (top by reactions: usage limits #16157 726, false "done" #42796 3,286; top by severity:
+  destructive git, 14+ incidents), 11 threats (native agent view + messaging now cover our list and
+  chat; five zero-star mods rebuilt our wedge in three weeks; Foremerge 518★ is the real entrant),
+  7 openings, and a 12-item roadmap. First sprint: R1 destructive-git guard, R2 hold dialog v2,
+  R4 STALE evidence, R6 `$.store` migration.
+
 ## 2026-10-23 — G6 measurement in place; Pro 0.1.0 built (G5-01 engineering half)
 
 - **Done:** `docs/FOUNDER_RUNBOOK.md`: every founder-only step (store, directory, clip, posts, outreach)

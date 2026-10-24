@@ -13,6 +13,15 @@ founder's outward actions, in this order, each with pre-filled values in `docs/F
 Early feedback: the founder showed the pane to people and it was received well (pane only; no
 workflow completions logged; nothing in the Alpha Testers sheet yet).
 
+## Engineering roadmap (from `docs/RESEARCH_G2_IMPROVEMENTS.md`, 2026-10-24)
+First sprint, in order: R1 destructive-git guard with cross-session awareness + safety refs; R2 hold
+dialog naming the owner with Ask owner / Proceed / Stop; R4 STALE evidence in handoff + refusal of
+unverified "done"; R6 migrate shared state to `$.store` and sessions to `claude agents --json`.
+Then R3 preflight v2 (merge-tree incl. uncommitted), R5 compaction-safe task state, R7 per-session
+usage attribution, R8 permission ledger, R9 secret guard, R10 worktree lifecycle, R11 subagent paths.
+Positioning change: not "a control tower" (native agent view is that) but "stops sessions destroying
+each other's work, shows what collides before merge, refuses to call unverified work done".
+
 ## Claude's next actions (when the founder reports a step)
 - Store URL arrives → put it in README (Pro paragraph), `src/commands/check.ts` Pro hint, `docs/LAUNCH_POSTS.md`, `docs/PRIVACY.md` (support email); push; tag v0.2.2.
 - Orders → founder fulfils with `npm run fulfil`; Claude logs Weekly Metrics (gross / fees / refunds) and files feedback as issues.
